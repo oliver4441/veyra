@@ -7,6 +7,7 @@ import {
   watchlists,
   movies,
   episodes,
+  mediaFiles,
 } from '../db/schema';
 import type { Env } from '../index';
 
@@ -140,7 +141,7 @@ watch.get('/history', async (c) => {
   return c.json({ history });
 });
 
-// GET /api/watch/streaming-url/:movieId - Get streaming URL for a movie
+// GET /api/watch/streaming-url/:movieId - Get streaming URL for a movie from R2
 watch.get('/streaming-url/:movieId', async (c) => {
   const db = getDb(c.env.DATABASE_URL);
   const movieId = parseInt(c.req.param('movieId'));
@@ -161,13 +162,46 @@ watch.get('/streaming-url/:movieId', async (c) => {
     return c.json({ error: 'Streaming not enabled for this title' }, 403);
   }
 
-  // TODO: Integrate with TeraBox API to get actual streaming URL
-  // For now, return a placeholder
+  // Get the media file for this quality from R2
+  const [mediaFile] = await db
+    .select()
+    .from(mediaFiles)
+    .where(
+      and(
+        eq(mediaFiles.movieId, movieId),
+        eq(mediaFiles.quality, quality as any),
+        eq(mediaFiles.streamingEnabled, true)
+      )
+    )
+    .limit(1);
+
+  if (!mediaFile || !mediaFile.r2Key) {
+    return c.json({ error: 'Media file not found for requested quality' }, 404);
+  }
+
+  // Get the public URL from R2
+  const streamingUrl = mediaFile.publicUrl || 
+    (c.env.R2_PUBLIC_DOMAIN 
+      ? `https://${c.env.R2_PUBLIC_DOMAIN}/${mediaFile.r2Key}`
+      : null);
+
+  if (!streamingUrl) {
+    return c.json({ error: 'Streaming URL not available' }, 500);
+  }
+
+  // Increment view count
+  await db
+    .update(movies)
+    .set({ viewCount: (movie.viewCount || 0) + 1 })
+    .where(eq(movies.id, movieId));
+
   return c.json({
     movieId,
     quality,
-    streamingUrl: `https://placeholder.veyra.app/stream/${movieId}/${quality}/playlist.m3u8`,
-    expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours
+    streamingUrl,
+    contentType: mediaFile.mimeType,
+    fileSize: mediaFile.fileSize,
+    duration: mediaFile.duration,
   });
 });
 

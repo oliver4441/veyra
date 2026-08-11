@@ -1,15 +1,13 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { jwt } from 'hono/jwt';
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
-import * as schema from './db/schema';
 import { authRoutes } from './routes/auth';
 import { movieRoutes } from './routes/movies';
 import { searchRoutes } from './routes/search';
 import { watchRoutes } from './routes/watch';
 import { adminRoutes } from './routes/admin';
 import { genreRoutes } from './routes/genres';
+import { storageRoutes } from './routes/storage';
 
 // Environment bindings
 export interface Env {
@@ -17,6 +15,8 @@ export interface Env {
   JWT_SECRET: string;
   CORS_ORIGIN: string;
   ENVIRONMENT: string;
+  R2_BUCKET: R2Bucket;
+  R2_PUBLIC_DOMAIN?: string;
 }
 
 // Create the main app
@@ -57,8 +57,10 @@ app.route('/api/genres', genreRoutes);
 // Protected routes (require JWT)
 app.use('/api/watch/*', jwt({ secret: (c) => c.env.JWT_SECRET }));
 app.use('/api/admin/*', jwt({ secret: (c) => c.env.JWT_SECRET }));
+app.use('/api/storage/*', jwt({ secret: (c) => c.env.JWT_SECRET }));
 app.route('/api/watch', watchRoutes);
 app.route('/api/admin', adminRoutes);
+app.route('/api/storage', storageRoutes);
 
 // 404 handler
 app.notFound((c) => c.json({ error: 'Not found' }, 404));

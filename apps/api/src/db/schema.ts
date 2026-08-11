@@ -24,7 +24,7 @@ export const rightsStatusEnum = pgEnum('rights_status', [
   'blocked',
 ]);
 export const mediaStatusEnum = pgEnum('media_status', ['draft', 'processing', 'published', 'archived']);
-export const storageProviderEnum = pgEnum('storage_provider', ['terabox', 'r2', 'b2', 's3']);
+export const storageProviderEnum = pgEnum('storage_provider', ['r2', 'b2', 's3']);
 export const qualityEnum = pgEnum('quality', ['480', '720', '1080', '4k']);
 
 // ==================== Users & Auth ====================
@@ -132,18 +132,22 @@ export const mediaFiles = pgTable('media_files', {
   id: serial('id').primaryKey(),
   movieId: integer('movie_id').references(() => movies.id, { onDelete: 'cascade' }),
   episodeId: integer('episode_id').references(() => episodes.id, { onDelete: 'cascade' }),
-  storageProvider: storageProviderEnum('storage_provider').notNull(),
-  storageFileId: text('storage_file_id'), // terabox fs_id, R2 key, etc.
-  storagePath: text('storage_path'),
+  storageProvider: storageProviderEnum('storage_provider').default('r2').notNull(),
+  r2Key: text('r2_key'), // R2 object key (e.g., 'movies/123/video-1080.mp4')
+  r2Bucket: varchar('r2_bucket', { length: 100 }), // R2 bucket name
+  r2Region: varchar('r2_region', { length: 20 }).default('auto'),
+  publicUrl: text('public_url'), // Public/custom domain URL if available
   originalFilename: varchar('original_filename', { length: 255 }),
   mimeType: varchar('mime_type', { length: 100 }),
   fileSize: integer('file_size'),
-  duration: integer('duration'),
+  duration: integer('duration'), // in seconds
   width: integer('width'),
   height: integer('height'),
   codec: varchar('codec', { length: 50 }),
+  bitrate: integer('bitrate'), // in kbps
   quality: qualityEnum('quality'),
-  status: varchar('status', { length: 20 }).default('pending'),
+  checksum: text('checksum'), // MD5 or SHA-256 of the file
+  status: varchar('status', { length: 20 }).default('pending'), // pending, uploading, uploaded, processing, ready, error
   streamingEnabled: boolean('streaming_enabled').default(true),
   downloadEnabled: boolean('download_enabled').default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),

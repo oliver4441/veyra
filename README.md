@@ -13,18 +13,19 @@ A premium cinematic streaming platform built with Next.js, Cloudflare Workers, a
 
 ## Tech Stack
 
-- **Frontend:** Next.js 15, React 19, Tailwind CSS
+- **Frontend:** Next.js 15, React 19, Tailwind CSS, PWA
 - **Backend:** Cloudflare Workers, Hono Framework
 - **Database:** Neon PostgreSQL, Drizzle ORM
+- **Storage:** Cloudflare R2 (video, images, assets)
 - **Auth:** Custom JWT with PBKDF2 password hashing
-- **Deployment:** Vercel (frontend), Cloudflare (backend)
+- **Deployment:** Vercel (frontend), Cloudflare (backend + storage)
 
 ## Project Structure
 
 ```
 veyra/
 ├── apps/
-│   ├── web/          # Next.js frontend
+│   ├── web/          # Next.js frontend (PWA)
 │   └── api/          # Cloudflare Worker backend
 ├── packages/
 │   ├── db/           # Shared database schema
@@ -128,6 +129,15 @@ npm run dev:web   # Starts Next.js on port 3000
 - `POST /api/admin/movies/:id/episodes` - Add episode
 - `GET /api/admin/audit` - Audit logs
 - `GET /api/admin/users` - List users
+
+### Storage (Protected, Admin Only)
+- `POST /api/storage/upload/movie` - Upload movie file to R2
+- `POST /api/storage/upload/episode` - Upload episode file to R2
+- `POST /api/storage/upload/image` - Upload poster/backdrop/thumbnail
+- `GET /api/storage/download/:key` - Get download URL
+- `DELETE /api/storage/:key` - Delete file from R2
+- `GET /api/storage/list` - List files in R2
+- `GET /api/storage/quota` - Get storage usage
 
 ## Deployment
 
