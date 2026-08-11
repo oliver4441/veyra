@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Veyra - Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#ffb4aa",
+                      "tertiary-fixed": "#ffdad5",
+                      "primary-fixed": "#e9ddff",
+                      "secondary-fixed-dim": "#c8c6c8",
+                      "on-primary": "#3c0091",
+                      "on-primary-fixed": "#23005c",
+                      "surface-container": "#201f20",
+                      "primary-fixed-dim": "#d0bcff",
+                      "on-tertiary-container": "#5c0002",
+                      "surface-dim": "#131314",
+                      "on-tertiary-fixed-variant": "#930007",
+                      "surface-container-lowest": "#0e0e0f",
+                      "secondary-container": "#474649",
+                      "outline": "#958ea0",
+                      "on-secondary": "#303032",
+                      "inverse-on-surface": "#313031",
+                      "on-secondary-fixed-variant": "#474649",
+                      "on-surface": "#e5e2e3",
+                      "on-error": "#690005",
+                      "surface-variant": "#353436",
+                      "outline-variant": "#494454",
+                      "on-background": "#e5e2e3",
+                      "secondary": "#c8c6c8",
+                      "on-secondary-container": "#b7b4b7",
+                      "surface-container-high": "#2a2a2b",
+                      "error-container": "#93000a",
+                      "tertiary-fixed-dim": "#ffb4aa",
+                      "surface-container-highest": "#353436",
+                      "on-tertiary-fixed": "#410001",
+                      "inverse-primary": "#6d3bd7",
+                      "primary-container": "#a078ff",
+                      "tertiary-container": "#ff5447",
+                      "surface-bright": "#3a393a",
+                      "on-surface-variant": "#cbc3d7",
+                      "on-primary-fixed-variant": "#5516be",
+                      "primary": "#d0bcff",
+                      "on-secondary-fixed": "#1b1b1d",
+                      "on-tertiary": "#690003",
+                      "surface-container-low": "#1c1b1c",
+                      "on-primary-container": "#340080",
+                      "inverse-surface": "#e5e2e3",
+                      "surface": "#131314",
+                      "background": "#131314",
+                      "error": "#ffb4ab",
+                      "surface-tint": "#d0bcff",
+                      "secondary-fixed": "#e5e1e4",
+                      "on-error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "content-gap": "24px",
+                      "container-max": "1440px",
+                      "grid-margin-desktop": "64px",
+                      "gutter": "24px",
+                      "grid-margin-mobile": "20px",
+                      "section-gap": "80px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-xl": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-caps": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "display-xl": [
+                              "72px",
+                              {
+                                      "lineHeight": "80px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.1em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: #0A0A0B;
+            color: #e5e2e3;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .glass-panel {
+            background: rgba(20, 20, 22, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .violet-glow {
+            box-shadow: inset 0 0 10px rgba(160, 120, 255, 0.3), 0 0 20px rgba(160, 120, 255, 0.2);
+            border-bottom: 2px solid #a078ff;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(0deg, #0A0A0B 0%, rgba(10, 10, 11, 0.4) 50%, rgba(10, 10, 11, 0.1) 100%);
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="font-body-md text-body-md bg-background pb-24 md:pb-0">
+<!-- PWA Banner -->
+<div class="fixed top-0 w-full z-[60] bg-primary text-on-primary font-body-md text-sm py-2 px-grid-margin-mobile flex justify-between items-center transition-transform duration-300 transform -translate-y-full" id="pwa-banner">
+<span>Install Veyra for a better experience</span>
+<button class="font-bold" id="close-pwa">Add</button>
+</div>
+<!-- Mobile Top App Bar (Minimal for Hero bleeding) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-grid-margin-mobile py-4 bg-transparent backdrop-blur-md bg-surface/30 md:hidden">
+<div class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">Veyra</div>
+<div class="flex gap-4"><button aria-label="Change Language" class="text-on-surface hover:text-primary transition-colors flex items-center justify-center"><span class="material-symbols-outlined">language</span></button><button aria-label="Toggle Theme" class="text-on-surface hover:text-primary transition-colors flex items-center justify-center"><span class="material-symbols-outlined">dark_mode</span></button>
+<button class="text-on-surface hover:text-primary transition-colors"><span class="material-symbols-outlined">search</span></button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-white/10">
+<img class="w-full h-full object-cover" data-alt="A cinematic, high-contrast user avatar portrait in a neon-lit cyberpunk environment, dark violet and deep black tones, cinematic lighting, highly detailed face." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLVMCkbE_wJTXKaQQe0H2SjFDJ54jfhJZ2BBCpXdezVYmb89ahkJff5AKZ2zlr252govaWW8A4GSfjfgcmuz9DkvKmKeAtt8nHgg-RPqGma-WLuVsmwIr9eUx2-k3bVpEt0Ri_SOOlZBXFInmSLq7w2kwhwYyiywUoa6uwU7ytZeR5XjxX8I2cShsKxW6gEZMzKjq3xSBYllBHwcnJcYSpZWUdnkRFgFIugLYyUoWFB710sD9mP0A3Lg"/>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main>
+<!-- Hero Section -->
+<section class="relative w-full h-[618px] min-h-[500px]">
+<div class="absolute inset-0 w-full h-full" data-alt="A highly cinematic, dark and moody movie poster for a sci-fi thriller titled 'The Midnight Echo'. Featuring a lone figure standing before a massive, glowing, abstract portal in a desolate, futuristic cityscape. Deep charcoal blacks, intense violet neon glow, atmospheric fog, premium cinematic aesthetic, 8k resolution." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC6O2FQMh2StBGTifo_uEgmtH9Aeai0B6RyLxB_ETnXcz3I8LRFdzqHJsXjywdDd80Jml5vIFgb-riIsuJmN_cyDsnfquimD3_Mh_Sptj5QqbwdQl8QQvE-ZAi0B6HUbe_phBNFBHAaIt-qTsU4PmLHaT4ux90ghVoh4gd5oL-HaXNSII-Vw5d_nKv1zKF2EClYQDGaO8LcHtN8ooUBZjG6t4kGRFXv0F2K20Fhp3TOTtmIgzdmrhTEiw')">
+<div class="absolute inset-0 hero-gradient"></div>
+</div>
+<div class="absolute bottom-0 left-0 w-full px-grid-margin-mobile pb-content-gap flex flex-col gap-4 z-10">
+<div class="flex gap-2 mb-2">
+<span class="glass-panel px-3 py-1 rounded-full font-label-caps text-[10px] text-white">SCI-FI</span>
+<span class="glass-panel px-3 py-1 rounded-full font-label-caps text-[10px] text-white">THRILLER</span>
+<span class="glass-panel px-3 py-1 rounded-full font-label-caps text-[10px] text-primary">NEW</span>
+</div>
+<h1 class="font-display-xl text-display-xl text-white font-extrabold leading-tight tracking-tighter shadow-sm text-4xl mb-2">The Midnight Echo</h1>
+<p class="font-body-md text-on-surface-variant line-clamp-2 max-w-sm mb-4">When a strange frequency begins broadcasting across the globe, one team must uncover its origin before the signal completes its sequence.</p>
+<div class="flex gap-4 w-full">
+<button class="flex-1 bg-gradient-to-r from-primary-container to-inverse-primary text-white font-bold py-3 rounded-lg flex justify-center items-center gap-2 violet-glow hover:scale-[1.02] transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">play_arrow</span> Play Now
+                    </button>
+<button class="flex-1 glass-panel text-white font-bold py-3 rounded-lg flex justify-center items-center gap-2 hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">add</span> My List
+                    </button>
+</div>
+</div>
+</section>
+<!-- Continue Watching Row -->
+<section class="mt-section-gap px-grid-margin-mobile">
+<h2 class="font-headline-md text-headline-md mb-content-gap text-on-surface">Continue Watching</h2>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4 -mx-grid-margin-mobile px-grid-margin-mobile">
+<!-- Item 1 -->
+<div class="min-w-[240px] w-[240px] flex flex-col gap-2 group cursor-pointer">
+<div class="relative w-full aspect-video rounded-lg overflow-hidden bg-surface-container hover:scale-105 transition-transform duration-300">
+<div class="absolute inset-0" data-alt="A gritty, cinematic still from a dark cyberpunk detective series. Neon street lights reflecting on wet pavement, deep shadows, violet accents, high contrast, 4k quality." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBI1q4x7y9wtfxoVgs6jSQ0NlBYr7ciIrFa2aXYUonpnog1JraW-qhuA45-Po-Z7EHd0-NykENQp88rGmVdE57Dt_2yiEMdYeFmL7qopKvvqGN9O-7azYUXQTC24E8Frs7ecwYFGHWdd-1j4UA9LA0EBgy8SfLKw7z4MSSUCRS9AIaxMtyccJAjE-Ipo28Qv6D6IUK-JOHstu7SryjZ82toJaQpnGshFwu6FmSe60mwkOSPhlcdT-4-uw')"></div>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<span class="material-symbols-outlined text-4xl text-white">play_circle</span>
+</div>
+<!-- Progress Bar -->
+<div class="absolute bottom-0 left-0 w-full h-1 bg-surface-variant">
+<div class="h-full bg-primary w-[65%]"></div>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-body-md font-bold text-on-surface line-clamp-1">Neon Noir</h3>
+<p class="font-label-caps text-[10px] text-on-surface-variant">S1:E4 "The Setup"</p>
+</div>
+<button class="text-on-surface-variant"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="min-w-[240px] w-[240px] flex flex-col gap-2 group cursor-pointer">
+<div class="relative w-full aspect-video rounded-lg overflow-hidden bg-surface-container hover:scale-105 transition-transform duration-300">
+<div class="absolute inset-0" data-alt="A sweeping, epic fantasy landscape shot. Dark, foreboding mountains under a stormy, violet-tinged sky. Cinematic lighting, highly detailed, premium streaming quality look." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBlWtixcyd7nucNJ7pxZEad1I0pw4LwDON0CMVd8JzaTwskGWJ5xYJ7fpc2HY5ZEPlvhKrTmrryNPLXRmocw2A-RJnds_JdjhAEYYIMUuiMuKXl-I-iStCcSIWy5jR5e_TDBfis5F5bOR53XHkbthYnb6GmQm3zI_7lbIj4WqyplsCp1gg5vxK8lR2Cn-t--M5iHZI35hY3N-McL28PyT-aa2jUmvoj1DLVOKMVtl_TawTvC4ZAnUo0Sg')"></div>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+<span class="material-symbols-outlined text-4xl text-white">play_circle</span>
+</div>
+<!-- Progress Bar -->
+<div class="absolute bottom-0 left-0 w-full h-1 bg-surface-variant">
+<div class="h-full bg-primary w-[15%]"></div>
+</div>
+</div>
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-body-md font-bold text-on-surface line-clamp-1">Kingdoms of Ash</h3>
+<p class="font-label-caps text-[10px] text-on-surface-variant">2h 14m left</p>
+</div>
+<button class="text-on-surface-variant"><span class="material-symbols-outlined text-sm">more_vert</span></button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (from JSON) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-3 px-4 lg:hidden border-t border-white/10 bg-surface/80 bg-surface/80 backdrop-blur-lg docked full-width bottom-0 rounded-t-xl 0px -8px 24px rgba(0,0,0,0.5)">
+<a class="flex flex-col items-center justify-center text-primary active:bg-surface-variant Active: scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-caps text-[10px] mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-label-caps text-[10px] mt-1">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant" href="#">
+<span class="material-symbols-outlined">search</span>
+<span class="font-label-caps text-[10px] mt-1">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant" href="#">
+<span class="material-symbols-outlined">download</span>
+<span class="font-label-caps text-[10px] mt-1">Downloads</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-caps text-[10px] mt-1">Profile</span>
+</a>
+</nav>
+<script>
+        // Simple PWA banner logic
+        setTimeout(() => {
+            const banner = document.getElementById('pwa-banner');
+            banner.classList.remove('-translate-y-full');
+            
+            document.getElementById('close-pwa').addEventListener('click', () => {
+                banner.classList.add('-translate-y-full');
+            });
+        }, 2000);
+    </script>
+</body></html>

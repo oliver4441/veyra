@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Veyra Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#930007",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#c8c6c8",
+                        "tertiary-container": "#ff5447",
+                        "error-container": "#93000a",
+                        "outline": "#958ea0",
+                        "surface": "#131314",
+                        "surface-container-low": "#1c1b1c",
+                        "inverse-primary": "#6d3bd7",
+                        "surface-dim": "#131314",
+                        "secondary-fixed": "#e5e1e4",
+                        "on-tertiary-container": "#5c0002",
+                        "inverse-on-surface": "#313031",
+                        "on-secondary-fixed-variant": "#474649",
+                        "tertiary-fixed-dim": "#ffb4aa",
+                        "on-tertiary-fixed": "#410001",
+                        "on-primary-fixed": "#23005c",
+                        "secondary": "#c8c6c8",
+                        "on-primary-container": "#340080",
+                        "background": "#131314",
+                        "surface-container": "#201f20",
+                        "on-surface": "#e5e2e3",
+                        "primary-container": "#a078ff",
+                        "tertiary": "#ffb4aa",
+                        "surface-bright": "#3a393a",
+                        "surface-variant": "#353436",
+                        "surface-container-lowest": "#0e0e0f",
+                        "on-secondary": "#303032",
+                        "on-secondary-fixed": "#1b1b1d",
+                        "on-primary-fixed-variant": "#5516be",
+                        "surface-container-high": "#2a2a2b",
+                        "surface-container-highest": "#353436",
+                        "inverse-surface": "#e5e2e3",
+                        "secondary-container": "#474649",
+                        "primary": "#d0bcff",
+                        "tertiary-fixed": "#ffdad5",
+                        "surface-tint": "#d0bcff",
+                        "on-primary": "#3c0091",
+                        "on-error": "#690005",
+                        "outline-variant": "#494454",
+                        "on-secondary-container": "#b7b4b7",
+                        "on-tertiary": "#690003",
+                        "primary-fixed": "#e9ddff",
+                        "on-background": "#e5e2e3",
+                        "on-surface-variant": "#cbc3d7",
+                        "error": "#ffb4ab"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "80px",
+                        "grid-margin-mobile": "20px",
+                        "grid-margin-desktop": "64px",
+                        "container-max": "1440px",
+                        "content-gap": "24px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-caps": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "display-xl": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "display-xl": ["72px", { "lineHeight": "80px", "letterSpacing": "-0.04em", "fontWeight": "800" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0A0A0B;
+            color: #e5e2e3;
+        }
+        .glass-panel {
+            background: rgba(20, 20, 22, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-border:hover {
+            border-bottom: 2px solid #a078ff;
+            transform: scale(1.02);
+            transition: all 0.3s ease;
+        }
+        .primary-btn-glow {
+            background: linear-gradient(135deg, #a078ff, #d0bcff);
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        .sparkline {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 2s ease-out forwards;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden font-body-md text-body-md">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col h-screen w-64 bg-surface-container-low border-r border-white/5 shadow-sm p-6 space-y-4">
+<div class="flex items-center gap-4 mb-8">
+<img class="w-10 h-10 rounded-full object-cover" data-alt="A small circular avatar of a futuristic system administrator with glowing purple accents. High-tech cyberpunk aesthetic, dark cinematic lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq6Uw0-hU0WYCSWTdaUOrgXvzgT2sarKddSJf8SjHJ2OgnhXubJQ3Q-CPp50-NrDEVoFEC5BLxjmEmswRSFLd9h-WuxqwJ9nBoqZ0ULLQdu3M7TFn3Gtb4JAOuS35x9gNA-dyaOhZnPJuIWFrxzStF4VOwb4t6YN1EeUBI-Un4MSnKUuDUFXhJDqdBNONUfdYUqDbV2g5tObAgyM_X7DHaW3YbkCAja9ggBxemiBhTXKsU3ib1Px9cEQ"/>
+<div>
+<h1 class="font-headline-md text-headline-md font-extrabold text-primary tracking-tighter">Veyra Admin</h1>
+<p class="font-label-caps text-label-caps text-on-surface-variant">System Controller</p>
+</div>
+</div>
+<button class="w-full primary-btn-glow text-white font-bold py-3 rounded-lg mb-6 flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">upload</span>
+            Upload Content
+        </button>
+<div class="flex-1 flex flex-col space-y-2">
+<!-- Active Tab -->
+<a class="flex items-center gap-3 p-3 bg-primary-container text-on-primary-container rounded-lg font-bold scale-98 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all hover:bg-surface-bright" href="#">
+<span class="material-symbols-outlined">movie</span>
+<span>Content</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all hover:bg-surface-bright" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Users</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all hover:bg-surface-bright" href="#">
+<span class="material-symbols-outlined">monitoring</span>
+<span>Analytics</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all hover:bg-surface-bright" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all hover:bg-surface-bright" href="#">
+<span class="material-symbols-outlined">database</span>
+<span>Storage</span>
+</a>
+</div>
+<div class="mt-auto">
+<a class="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all hover:bg-surface-bright" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 overflow-y-auto p-grid-margin-mobile md:p-grid-margin-desktop space-y-section-gap relative">
+<!-- Header -->
+<header class="flex justify-between items-end">
+<div>
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface">System Overview</h2>
+<p class="text-on-surface-variant font-body-lg text-body-lg">Real-time metrics and processing status.</p>
+</div>
+<div class="hidden md:flex gap-4">
+<button class="p-2 bg-surface-container rounded-full text-on-surface-variant hover:text-white transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<!-- StatCards Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Metric 1 -->
+<div class="bg-[#141416] p-6 rounded-xl border border-white/10 shadow-lg glow-border relative overflow-hidden">
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Total Movies</div>
+<span class="material-symbols-outlined text-primary">movie</span>
+</div>
+<div class="font-headline-md text-headline-md font-bold text-white relative z-10">1,240</div>
+<div class="text-tertiary mt-2 text-sm relative z-10">+12 this week</div>
+<!-- Sparkline -->
+<svg class="absolute bottom-0 right-0 w-32 h-16 opacity-30" viewbox="0 0 100 40">
+<path class="sparkline" d="M0,40 L20,30 L40,35 L60,15 L80,20 L100,5" fill="none" stroke="#d0bcff" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Metric 2 -->
+<div class="bg-[#141416] p-6 rounded-xl border border-white/10 shadow-lg glow-border relative overflow-hidden">
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Total Users</div>
+<span class="material-symbols-outlined text-primary">group</span>
+</div>
+<div class="font-headline-md text-headline-md font-bold text-white relative z-10">15.2k</div>
+<div class="text-tertiary mt-2 text-sm relative z-10">+450 this month</div>
+<svg class="absolute bottom-0 right-0 w-32 h-16 opacity-30" viewbox="0 0 100 40">
+<path class="sparkline" d="M0,40 L10,35 L30,30 L50,10 L70,15 L100,0" fill="none" stroke="#d0bcff" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Metric 3 -->
+<div class="bg-[#141416] p-6 rounded-xl border border-white/10 shadow-lg glow-border relative overflow-hidden">
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Storage Used</div>
+<span class="material-symbols-outlined text-primary">database</span>
+</div>
+<div class="font-headline-md text-headline-md font-bold text-white relative z-10">620 GB</div>
+<div class="text-error mt-2 text-sm relative z-10">62% Capacity</div>
+<svg class="absolute bottom-0 right-0 w-32 h-16 opacity-30" viewbox="0 0 100 40">
+<path class="sparkline" d="M0,40 L20,38 L40,30 L60,25 L80,10 L100,5" fill="none" stroke="#ffb4ab" stroke-width="2"></path>
+</svg>
+</div>
+<!-- Metric 4 -->
+<div class="bg-[#141416] p-6 rounded-xl border border-white/10 shadow-lg glow-border relative overflow-hidden">
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Views Today</div>
+<span class="material-symbols-outlined text-primary">visibility</span>
+</div>
+<div class="font-headline-md text-headline-md font-bold text-white relative z-10">4.8k</div>
+<div class="text-tertiary mt-2 text-sm relative z-10">+12% vs yesterday</div>
+<svg class="absolute bottom-0 right-0 w-32 h-16 opacity-30" viewbox="0 0 100 40">
+<path class="sparkline" d="M0,40 L15,20 L35,25 L55,5 L75,10 L100,0" fill="none" stroke="#d0bcff" stroke-width="2"></path>
+</svg>
+</div>
+</section>
+<!-- Complex Layout Section -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Storage Overview (Bento Item 1) -->
+<div class="lg:col-span-1 glass-panel rounded-xl p-8 flex flex-col justify-between relative overflow-hidden group">
+<!-- Abstract glowing orb behind -->
+<div class="absolute -top-20 -right-20 w-64 h-64 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-all duration-700"></div>
+<div class="relative z-10">
+<h3 class="font-headline-md text-headline-md font-bold text-white mb-2">TeraBox Storage</h3>
+<p class="text-on-surface-variant mb-8">Current utilization of primary array.</p>
+<div class="flex justify-between items-end mb-2">
+<span class="font-headline-lg text-headline-lg text-primary font-bold">620<span class="text-body-lg text-on-surface-variant font-normal">GB</span></span>
+<span class="text-on-surface-variant">/ 1 TB</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[62%] shadow-[0_0_10px_rgba(208,188,255,0.8)]"></div>
+</div>
+</div>
+<div class="relative z-10 mt-8 pt-6 border-t border-white/10 flex justify-between items-center">
+<span class="text-sm text-on-surface-variant">Last synced: 2m ago</span>
+<button class="text-primary hover:text-white transition-colors text-sm font-bold flex items-center gap-1">
+                        Manage <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Recent Processing Jobs (Bento Item 2) -->
+<div class="lg:col-span-2 bg-[#141416] border border-white/10 rounded-xl p-8 shadow-[0_24px_48px_rgba(0,0,0,0.5)]">
+<div class="flex justify-between items-center mb-8">
+<h3 class="font-headline-md text-headline-md font-bold text-white">Recent Processing Jobs</h3>
+<button class="text-on-surface-variant hover:text-white transition-colors">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+<div class="space-y-6">
+<!-- Job 1 -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg bg-surface-container hover:bg-surface-variant transition-colors border border-transparent hover:border-white/5">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-12 h-12 rounded bg-surface-container-high flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">cloud_upload</span>
+</div>
+<div>
+<h4 class="font-bold text-white">Dune: Part Two_4K.mkv</h4>
+<p class="text-sm text-on-surface-variant">Uploading to origin server</p>
+</div>
+</div>
+<div class="w-full md:w-48 flex flex-col gap-2">
+<div class="flex justify-between text-xs text-on-surface-variant">
+<span>45%</span>
+<span>12 mins left</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[45%]"></div>
+</div>
+</div>
+</div>
+<!-- Job 2 -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg bg-surface-container hover:bg-surface-variant transition-colors border border-transparent hover:border-white/5">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-12 h-12 rounded bg-surface-container-high flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-tertiary">memory</span>
+</div>
+<div>
+<h4 class="font-bold text-white">Neon_Genesis_Ep01.mp4</h4>
+<p class="text-sm text-on-surface-variant">Transcoding to 1080p, 720p</p>
+</div>
+</div>
+<div class="w-full md:w-48 flex flex-col gap-2">
+<div class="flex justify-between text-xs text-on-surface-variant">
+<span>82%</span>
+<span>Estimating...</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[82%]"></div>
+</div>
+</div>
+</div>
+<!-- Job 3 -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 rounded-lg bg-surface-container hover:bg-surface-variant transition-colors border border-transparent hover:border-white/5">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-12 h-12 rounded bg-surface-container-high flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-green-400">check_circle</span>
+</div>
+<div>
+<h4 class="font-bold text-white">Blade_Runner_2049_H265.mkv</h4>
+<p class="text-sm text-on-surface-variant">Indexing complete</p>
+</div>
+</div>
+<div class="w-full md:w-48 flex items-center justify-end">
+<span class="text-sm text-green-400 font-bold bg-green-400/10 px-3 py-1 rounded-full">Complete</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom spacing for mobile nav if needed, though this is an admin view -->
+<div class="h-24 md:h-0"></div>
+</main>
+<!-- Mobile Navigation (Bottom Nav) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-3 px-4 md:hidden bg-surface/80 backdrop-blur-lg border-t border-white/10 rounded-t-xl" style="box-shadow: 0px -8px 24px rgba(0,0,0,0.5);">
+<a class="flex flex-col items-center justify-center text-primary scale-110 transition-transform" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-caps text-[10px] mt-1">Dash</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">movie</span>
+<span class="font-label-caps text-[10px] mt-1">Content</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-caps text-[10px] mt-1">Users</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-[10px] mt-1">Settings</span>
+</a>
+</nav>
+</body></html>

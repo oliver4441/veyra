@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Veyra Watch Movie - Mobile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#ffb4aa",
+                        "tertiary-fixed": "#ffdad5",
+                        "primary-fixed": "#e9ddff",
+                        "secondary-fixed-dim": "#c8c6c8",
+                        "on-primary": "#3c0091",
+                        "on-primary-fixed": "#23005c",
+                        "surface-container": "#201f20",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-tertiary-container": "#5c0002",
+                        "surface-dim": "#131314",
+                        "on-tertiary-fixed-variant": "#930007",
+                        "surface-container-lowest": "#0e0e0f",
+                        "secondary-container": "#474649",
+                        "outline": "#958ea0",
+                        "on-secondary": "#303032",
+                        "inverse-on-surface": "#313031",
+                        "on-secondary-fixed-variant": "#474649",
+                        "on-surface": "#e5e2e3",
+                        "on-error": "#690005",
+                        "surface-variant": "#353436",
+                        "outline-variant": "#494454",
+                        "on-background": "#e5e2e3",
+                        "secondary": "#c8c6c8",
+                        "on-secondary-container": "#b7b4b7",
+                        "surface-container-high": "#2a2a2b",
+                        "error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb4aa",
+                        "surface-container-highest": "#353436",
+                        "on-tertiary-fixed": "#410001",
+                        "inverse-primary": "#6d3bd7",
+                        "primary-container": "#a078ff",
+                        "tertiary-container": "#ff5447",
+                        "surface-bright": "#3a393a",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-primary-fixed-variant": "#5516be",
+                        "primary": "#d0bcff",
+                        "on-secondary-fixed": "#1b1b1d",
+                        "on-tertiary": "#690003",
+                        "surface-container-low": "#1c1b1c",
+                        "on-primary-container": "#340080",
+                        "inverse-surface": "#e5e2e3",
+                        "surface": "#131314",
+                        "background": "#131314",
+                        "error": "#ffb4ab",
+                        "surface-tint": "#d0bcff",
+                        "secondary-fixed": "#e5e1e4",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "content-gap": "24px",
+                        "container-max": "1440px",
+                        "grid-margin-desktop": "64px",
+                        "gutter": "24px",
+                        "grid-margin-mobile": "20px",
+                        "section-gap": "80px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "display-xl": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-caps": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-xl": ["72px", { "lineHeight": "80px", "letterSpacing": "-0.04em", "fontWeight": "800" }],
+                        "headline-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass-panel {
+            background: rgba(20, 20, 22, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .ui-fade {
+            transition: opacity 0.5s ease-in-out;
+        }
+        .ui-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background h-screen w-screen overflow-hidden m-0 p-0">
+<!-- Video Backdrop Container -->
+<div class="absolute inset-0 w-full h-full bg-surface-dim z-0">
+<div class="bg-cover bg-center w-full h-full opacity-60" data-alt="A cinematic, high-contrast still frame from a thrilling sci-fi movie. A lone figure stands against a sprawling, futuristic cyberpunk cityscape glowing with intense neon violet and deep charcoal shadows. The scene is immersive, moody, and highly detailed, captured in dark mode aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBHf7jOcY91WOly3Yona1RAt5I_YWtUIOzm8zk_FRbWoiUENacu3ZzNWHrbcVfhQ6RulheK47sMN4Ese1icqDGNrysKtXEy5jnX43FTBzsa4XAcMStogwAZPLHBdrtyZxYvL489A-v4WL5EY6o-qWWXtGe0PEeojZWvPKdtO3JnKl4SKNGHdi-Oo6HDzx5qRxRXDCT6uHJnx6KxtAAVmFgZtyo8TLy4uwCvH8GxFs-mlniutQdwSGuATQ')"></div>
+</div>
+<!-- UI Overlay Area -->
+<div class="absolute inset-0 z-10 flex flex-col justify-between p-grid-margin-mobile ui-fade" id="video-ui">
+<!-- Top Action Bar -->
+<div class="flex justify-between items-start w-full">
+<button class="glass-panel p-2 rounded-full text-on-surface hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex gap-4">
+<button class="glass-panel p-2 rounded-full text-on-surface hover:text-primary transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="cast">cast</span>
+</button>
+<button class="glass-panel p-2 rounded-full text-on-surface hover:text-primary transition-colors flex items-center justify-center relative group">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<!-- Simplified Settings Menu (Hidden by default, shown on hover/click for demo) -->
+<div class="hidden group-hover:flex absolute top-12 right-0 glass-panel rounded-lg p-2 flex-col gap-2 min-w-[120px]">
+</div></button><button class="text-left px-3 py-2 text-body-md font-body-md text-on-surface hover:bg-surface-variant rounded">Auto</button>
+<button class="text-left px-3 py-2 text-body-md font-body-md text-primary font-bold hover:bg-surface-variant rounded">1080p</button>
+<button class="text-left px-3 py-2 text-body-md font-body-md text-on-surface hover:bg-surface-variant rounded">720p</button>
+</div>
+</div>
+</div>
+<!-- Center Play Controls -->
+<div class="flex flex-col items-center justify-center flex-grow pointer-events-none">
+<div class="flex items-center justify-center gap-8 pointer-events-auto">
+<button class="text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[48px]" data-icon="replay_10">replay_10</span>
+</button>
+<button class="text-on-surface hover:text-primary transition-transform hover:scale-110">
+<span class="material-symbols-outlined text-[80px]" data-icon="play_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+</button>
+<button class="text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[48px]" data-icon="forward_10">forward_10</span>
+</button>
+</div>
+</div>
+<!-- Bottom Controls -->
+<div class="w-full flex flex-col gap-4">
+<!-- Movie Info -->
+<div class="text-left">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-1">Neon Genesis</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">S1:E4 • "The Awakening"</p>
+</div>
+<!-- Progress Bar -->
+<div class="w-full flex items-center gap-3">
+<span class="font-label-caps text-label-caps text-on-surface-variant">24:10</span>
+<div class="flex-grow h-1 bg-surface-variant rounded-full relative cursor-pointer">
+<!-- Buffered -->
+<div class="absolute left-0 top-0 h-full bg-secondary-container rounded-full w-2/3"></div>
+<!-- Played -->
+<div class="absolute left-0 top-0 h-full bg-primary rounded-full w-1/3 shadow-[0_0_10px_rgba(208,188,255,0.5)]"></div>
+<!-- Playhead -->
+<div class="absolute left-1/3 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]"></div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">45:00</span>
+</div>
+</div>
+<!-- Hidden Navigation (Suppressed on video player) -->
+<!-- SideNavBar / BottomNavBar excluded based on rules -->
+<script>
+        // Simple UI fade interaction
+        let timeout;
+        const uiContainer = document.getElementById('video-ui');
+
+        function resetFadeTimer() {
+            uiContainer.classList.remove('ui-hidden');
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                uiContainer.classList.add('ui-hidden');
+            }, 3000); // Fade after 3 seconds of inactivity
+        }
+
+        document.addEventListener('mousemove', resetFadeTimer);
+        document.addEventListener('touchstart', resetFadeTimer);
+        
+        // Initial setup
+        resetFadeTimer();
+    </script>
+</body></html>

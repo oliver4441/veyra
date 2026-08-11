@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Veyra - Search &amp; Explore</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts (Plus Jakarta Sans) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary": "#ffb4aa",
+                      "tertiary-fixed": "#ffdad5",
+                      "primary-fixed": "#e9ddff",
+                      "secondary-fixed-dim": "#c8c6c8",
+                      "on-primary": "#3c0091",
+                      "on-primary-fixed": "#23005c",
+                      "surface-container": "#201f20",
+                      "primary-fixed-dim": "#d0bcff",
+                      "on-tertiary-container": "#5c0002",
+                      "surface-dim": "#131314",
+                      "on-tertiary-fixed-variant": "#930007",
+                      "surface-container-lowest": "#0e0e0f",
+                      "secondary-container": "#474649",
+                      "outline": "#958ea0",
+                      "on-secondary": "#303032",
+                      "inverse-on-surface": "#313031",
+                      "on-secondary-fixed-variant": "#474649",
+                      "on-surface": "#e5e2e3",
+                      "on-error": "#690005",
+                      "surface-variant": "#353436",
+                      "outline-variant": "#494454",
+                      "on-background": "#e5e2e3",
+                      "secondary": "#c8c6c8",
+                      "on-secondary-container": "#b7b4b7",
+                      "surface-container-high": "#2a2a2b",
+                      "error-container": "#93000a",
+                      "tertiary-fixed-dim": "#ffb4aa",
+                      "surface-container-highest": "#353436",
+                      "on-tertiary-fixed": "#410001",
+                      "inverse-primary": "#6d3bd7",
+                      "primary-container": "#a078ff",
+                      "tertiary-container": "#ff5447",
+                      "surface-bright": "#3a393a",
+                      "on-surface-variant": "#cbc3d7",
+                      "on-primary-fixed-variant": "#5516be",
+                      "primary": "#d0bcff",
+                      "on-secondary-fixed": "#1b1b1d",
+                      "on-tertiary": "#690003",
+                      "surface-container-low": "#1c1b1c",
+                      "on-primary-container": "#340080",
+                      "inverse-surface": "#e5e2e3",
+                      "surface": "#131314",
+                      "background": "#131314",
+                      "error": "#ffb4ab",
+                      "surface-tint": "#d0bcff",
+                      "secondary-fixed": "#e5e1e4",
+                      "on-error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "content-gap": "24px",
+                      "container-max": "1440px",
+                      "grid-margin-desktop": "64px",
+                      "gutter": "24px",
+                      "grid-margin-mobile": "20px",
+                      "section-gap": "80px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-md": ["Plus Jakarta Sans"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "body-lg": ["Plus Jakarta Sans"],
+                      "display-xl": ["Plus Jakarta Sans"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"],
+                      "label-caps": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "headline-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "display-xl": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.04em", "fontWeight": "800"}],
+                      "headline-lg-mobile": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Custom scrollbar for horizontal lists */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .violet-glow-focus:focus-within {
+            box-shadow: 0 4px 20px -2px rgba(160, 120, 255, 0.4);
+            border-color: rgba(160, 120, 255, 0.6);
+        }
+        
+        .glass-panel {
+            background: rgba(20, 20, 22, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container pb-[80px]">
+<!-- Main Content Area -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-grid-margin-mobile md:px-grid-margin-desktop py-6 flex flex-col gap-content-gap">
+<!-- Search Header -->
+<header class="flex flex-col gap-4">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Explore</h1>
+<!-- Search Input -->
+<div class="relative w-full rounded-xl bg-surface-container-high border border-outline-variant/30 violet-glow-focus transition-all duration-300 flex items-center px-4 py-3">
+<span class="material-symbols-outlined text-on-surface-variant mr-3" data-icon="search">search</span>
+<input class="w-full bg-transparent border-none outline-none text-on-surface placeholder:text-on-surface-variant font-body-md focus:ring-0 p-0" placeholder="Search movies, series, or genres..." type="text"/>
+<button class="ml-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</button>
+</div>
+</header>
+<!-- Genre Chips (Horizontal Scroll) -->
+<section class="w-[calc(100%+40px)] -ml-grid-margin-mobile px-grid-margin-mobile overflow-x-auto hide-scrollbar">
+<div class="flex gap-3 w-max pb-2">
+<button class="px-5 py-2 rounded-full bg-primary-container/20 border border-primary/30 text-primary font-label-caps text-label-caps whitespace-nowrap transition-all duration-300">
+                    ALL
+                </button>
+<button class="px-5 py-2 rounded-full bg-surface-variant/50 border border-white/5 text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps whitespace-nowrap transition-all duration-300">
+                    SCI-FI
+                </button>
+<button class="px-5 py-2 rounded-full bg-surface-variant/50 border border-white/5 text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps whitespace-nowrap transition-all duration-300">
+                    ACTION
+                </button>
+<button class="px-5 py-2 rounded-full bg-surface-variant/50 border border-white/5 text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps whitespace-nowrap transition-all duration-300">
+                    THRILLER
+                </button>
+<button class="px-5 py-2 rounded-full bg-surface-variant/50 border border-white/5 text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps whitespace-nowrap transition-all duration-300">
+                    COMEDY
+                </button>
+<button class="px-5 py-2 rounded-full bg-surface-variant/50 border border-white/5 text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps whitespace-nowrap transition-all duration-300">
+                    DRAMA
+                </button>
+</div>
+</section>
+<!-- Discovery Grid -->
+<section class="flex flex-col gap-4 mt-2">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Trending Searches</h2>
+<div class="grid grid-cols-2 gap-4">
+<!-- Movie Card 1 -->
+<div class="group relative rounded-xl overflow-hidden aspect-[2/3] bg-surface-container cursor-pointer transform hover:scale-[1.02] transition-all duration-300 shadow-xl border-b-2 border-transparent hover:border-primary">
+<img class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" data-alt="A cinematic movie poster featuring a lone astronaut standing on a desolate, dark volcanic planet under a massive glowing purple nebula. The lighting is high-contrast with deep charcoal shadows and striking violet highlights, evoking a premium, high-end sci-fi thriller vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8NWbyxJO7xL_OTAVLI9SgLylTXUI-JatMbIObuKYBdBFX0Yf3gh23AtSJZOVIjsJZHT4o7CN5F-HINiGY0-Bq65JK3iIiYQV5hcvI_opzhsnAGxabcajDZo0bc4bJoFL43wlZ_TXpf5vVkDP1WzPxebWiVHASeJgFuHvpgW7GN5a_fHh713qsBisNM1ExLnQ9Nc46NOuqsLGZC2pVHtyGEPTB6tQpU0iqATiVbi8eIg9nbQCDUziOhw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent p-4 flex flex-col justify-end">
+<div class="flex gap-2 mb-2">
+<span class="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white font-label-caps text-[10px] border border-white/20">HD</span>
+<span class="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white font-label-caps text-[10px] border border-white/20">SCI-FI</span>
+</div>
+<h3 class="font-headline-md text-lg leading-tight font-bold text-white mb-1">Neon Horizon</h3>
+</div>
+</div>
+<!-- Movie Card 2 -->
+<div class="group relative rounded-xl overflow-hidden aspect-[2/3] bg-surface-container cursor-pointer transform hover:scale-[1.02] transition-all duration-300 shadow-xl border-b-2 border-transparent hover:border-primary">
+<img class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" data-alt="A dark and moody thriller poster showing a silhouetted figure walking down a rain-slicked city alleyway at night. Neon signs reflect in the puddles, casting a subtle violet glow against the deep charcoal environment, creating a sense of sophisticated urban mystery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLuUcHkY5jca7hxprWRfJ3XRJLhDDzxBoTQzHCqBynrjt3HhJT1SfE-67Lwd47W4eKGnx8TyKjos6-z-63lrpxD1qhM1LSaR3XmQeWBqGhWFJpHvGF7SqYWC7xEQzPPSV9XgwV5pRZOrb0XdGYAZdBHTWap4arA7iDlhaIPxs6dM2r3FrHCKPd1YJ3zgLee3ZGxYrAvEUowBzEfNJAbA7mGcqW4o2VrSDEIBJVRXICTh7PpRaVxZPp3w"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent p-4 flex flex-col justify-end">
+<div class="flex gap-2 mb-2">
+<span class="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white font-label-caps text-[10px] border border-white/20">4K</span>
+<span class="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white font-label-caps text-[10px] border border-white/20">THRILLER</span>
+</div>
+<h3 class="font-headline-md text-lg leading-tight font-bold text-white mb-1">Midnight Protocol</h3>
+</div>
+</div>
+<!-- Movie Card 3 -->
+<div class="group relative rounded-xl overflow-hidden aspect-[2/3] bg-surface-container cursor-pointer transform hover:scale-[1.02] transition-all duration-300 shadow-xl border-b-2 border-transparent hover:border-primary">
+<img class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" data-alt="An action movie poster depicting a sleek, futuristic sports car drifting through a desert landscape at dusk. Dust billows behind it, illuminated by the fading sun and the car's aggressive taillights. The overall palette relies on deep blacks and striking contrast, fitting a premium streaming service aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDWiCVaPkFy6mhB-5wQE4ZKznEI-K2MjJIqHQ4LZj8P9Bs2UcoMZhAL4ls1pSjlXOcpJ4bWIzLx8xIrOZPqBQlD03vwb_P3BN5IBvvK_Qh1Ir1e89P5oEewj_X0tZEom-NKu8bojwGpaFKSvnWOx9Tao0oKcneflfMU-JVf23dWjiqm7g2EfuRsCz03tH7NvUo2fK-c1Za2ao-iHRpMIM9aRNjNdv2R0lakQDwZPqhqIAI1jvct4tsPQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent p-4 flex flex-col justify-end">
+<div class="flex gap-2 mb-2">
+<span class="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white font-label-caps text-[10px] border border-white/20">HD</span>
+<span class="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white font-label-caps text-[10px] border border-white/20">ACTION</span>
+</div>
+<h3 class="font-headline-md text-lg leading-tight font-bold text-white mb-1">Dust Devil</h3>
+</div>
+</div>
+<!-- Movie Card 4 -->
+<div class="group relative rounded-xl overflow-hidden aspect-[2/3] bg-surface-container cursor-pointer transform hover:scale-[1.02] transition-all duration-300 shadow-xl border-b-2 border-transparent hover:border-primary">
+<img class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" data-alt="A dramatic cinematic poster featuring an abstract composition of shattered glass floating in a dark void. A single bright, violet light source shines from behind the fragments, creating sharp edges and deep shadows. The visual style is highly sophisticated and minimalist, focusing on glassmorphism and depth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvgdCyFVto9MidwPF3kPgjv1x0dcW7DvEoeiheTsXQyv5LhMpk_TyB9C0EYj_ZoKwH94fgWsMDIPCKfg4t4XcWUDOEadej3IwbI1HaZ9TUqeFiRhdadAbWqr0iXtB40Q_Tu3kAMBY98DmNxjM7gStnGaOc1HyZ0f3VZtY6s3BStUS4wsgwEAI-_xugAHwt5-PF1x67wsFWLdsM_u9BtDe3StcfpOj7N31Nz6R-fiziv_vAvEXLnqAeXg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent p-4 flex flex-col justify-end">
+<div class="flex gap-2 mb-2">
+<span class="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white font-label-caps text-[10px] border border-white/20">HD</span>
+<span class="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur-md text-white font-label-caps text-[10px] border border-white/20">DRAMA</span>
+</div>
+<h3 class="font-headline-md text-lg leading-tight font-bold text-white mb-1">Fractured Truth</h3>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-3 px-4 md:hidden bg-surface/80 backdrop-blur-lg rounded-t-xl" style="box-shadow: 0px -8px 24px rgba(0,0,0,0.5);">
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant transition-colors rounded-lg p-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-caps text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary active:bg-surface-variant scale-110 transition-transform rounded-lg p-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="explore" data-weight="fill" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-label-caps text-[10px]">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant transition-colors rounded-lg p-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="search">search</span>
+<span class="font-label-caps text-[10px]">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant transition-colors rounded-lg p-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="download">download</span>
+<span class="font-label-caps text-[10px]">Downloads</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant transition-colors rounded-lg p-1" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-caps text-[10px]">Profile</span>
+</a>
+</nav>
+</body></html>

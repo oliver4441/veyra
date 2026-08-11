@@ -1,0 +1,20 @@
+{
+  "name": "veyra",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "build:web": "npm run build --workspace=apps/web",
+    "build:api": "npm run build --workspace=apps/api",
+    "deploy:web": "npm run deploy --workspace=apps/web",
+    "deploy:api": "npm run deploy --workspace=apps/api",
+    "db:generate": "npm run db:generate --workspace=packages/db",
+    "db:push": "npm run db:push --workspace=packages/db",
+    "db:studio": "npm run db:studio --workspace=packages/db",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

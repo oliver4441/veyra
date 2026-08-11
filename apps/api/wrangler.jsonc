@@ -1,0 +1,38 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "veyra-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-08-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "ENVIRONMENT": "development"
+  },
+  "dev": {
+    "port": 8787,
+    "local_protocol": "http"
+  },
+  "env": {
+    "staging": {
+      "vars": {
+        "ENVIRONMENT": "staging"
+      },
+      "routes": [
+        {
+          "pattern": "api-staging.veyra.app/*",
+          "custom_domain": true
+        }
+      ]
+    },
+    "production": {
+      "vars": {
+        "ENVIRONMENT": "production"
+      },
+      "routes": [
+        {
+          "pattern": "api.veyra.app/*",
+          "custom_domain": true
+        }
+      ]
+    }
+  }
+}

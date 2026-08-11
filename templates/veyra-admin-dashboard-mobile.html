@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Veyra Admin - Mobile Dashboard</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Glassmorphism utilities */
+        .glass-panel {
+            background: rgba(20, 20, 22, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .violet-glow {
+            box-shadow: 0 4px 20px -2px rgba(160, 120, 255, 0.2);
+        }
+    </style>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#ffb4aa",
+                        "tertiary-fixed": "#ffdad5",
+                        "primary-fixed": "#e9ddff",
+                        "secondary-fixed-dim": "#c8c6c8",
+                        "on-primary": "#3c0091",
+                        "on-primary-fixed": "#23005c",
+                        "surface-container": "#201f20",
+                        "primary-fixed-dim": "#d0bcff",
+                        "on-tertiary-container": "#5c0002",
+                        "surface-dim": "#131314",
+                        "on-tertiary-fixed-variant": "#930007",
+                        "surface-container-lowest": "#0e0e0f",
+                        "secondary-container": "#474649",
+                        "outline": "#958ea0",
+                        "on-secondary": "#303032",
+                        "inverse-on-surface": "#313031",
+                        "on-secondary-fixed-variant": "#474649",
+                        "on-surface": "#e5e2e3",
+                        "on-error": "#690005",
+                        "surface-variant": "#353436",
+                        "outline-variant": "#494454",
+                        "on-background": "#e5e2e3",
+                        "secondary": "#c8c6c8",
+                        "on-secondary-container": "#b7b4b7",
+                        "surface-container-high": "#2a2a2b",
+                        "error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb4aa",
+                        "surface-container-highest": "#353436",
+                        "on-tertiary-fixed": "#410001",
+                        "inverse-primary": "#6d3bd7",
+                        "primary-container": "#a078ff",
+                        "tertiary-container": "#ff5447",
+                        "surface-bright": "#3a393a",
+                        "on-surface-variant": "#cbc3d7",
+                        "on-primary-fixed-variant": "#5516be",
+                        "primary": "#d0bcff",
+                        "on-secondary-fixed": "#1b1b1d",
+                        "on-tertiary": "#690003",
+                        "surface-container-low": "#1c1b1c",
+                        "on-primary-container": "#340080",
+                        "inverse-surface": "#e5e2e3",
+                        "surface": "#131314",
+                        "background": "#131314",
+                        "error": "#ffb4ab",
+                        "surface-tint": "#d0bcff",
+                        "secondary-fixed": "#e5e1e4",
+                        "on-error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "content-gap": "24px",
+                        "container-max": "1440px",
+                        "grid-margin-desktop": "64px",
+                        "gutter": "24px",
+                        "grid-margin-mobile": "20px",
+                        "section-gap": "80px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "display-xl": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "label-caps": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "display-xl": ["72px", { "lineHeight": "80px", "letterSpacing": "-0.04em", "fontWeight": "800" }],
+                        "headline-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen pb-24 md:hidden antialiased">
+<!-- Mobile Header (Simplified TopAppBar context) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-grid-margin-mobile py-4 bg-transparent backdrop-blur-md shadow-2xl">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl" data-weight="fill" style="font-variation-settings: 'FILL' 1;">movie</span>
+<span class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">Veyra</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Admin Avatar" class="w-full h-full object-cover" data-alt="A macro photography shot of an abstract purple and violet fluid sphere, resembling a high-tech glowing energy core, set against an absolute deep black background to convey cinematic glassmorphism and premium digital sophistication." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6FEisr13lIanz1j4oOUcI0QTqgF2N-wpJETVBLYwWuKXA_4cZir2tIYMZZ3uG9RgdtYRfqP8YMSgIJXZwN0cEW0WmjHlixNn8ykByx3mtxQ2BUW_tYv5bt2j20shn-7DhPuH75PwJqJIpAglrSe502BVuGHGcMr5iPceJ9i9NCnDgCA77IsNU58fbD_9OIO3QcbJElxWnXMmAdf-mpNbc-ZWlf73UbfmiV51OePwCpHmjFqIwGIhtTA"/>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 px-grid-margin-mobile flex flex-col gap-content-gap">
+<!-- Page Title -->
+<div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Dashboard</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">System Overview</p>
+</div>
+<!-- Metric Cards Stack -->
+<div class="flex flex-col gap-4">
+<!-- Metric 1 -->
+<div class="bg-[#141416] p-5 rounded-xl border border-white/5 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+<div class="flex justify-between items-start mb-2">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">TOTAL MOVIES</p>
+<h2 class="font-headline-md text-headline-md text-on-surface">12,450</h2>
+</div>
+<div class="bg-primary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">movie</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-4">
+<span class="material-symbols-outlined text-emerald-400 text-sm">trending_up</span>
+<span class="font-label-caps text-label-caps text-emerald-400">+145 this week</span>
+</div>
+<!-- Abstract Sparkline -->
+<div class="absolute bottom-0 left-0 w-full h-1 bg-surface-variant">
+<div class="h-full bg-primary w-[70%]"></div>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-[#141416] p-5 rounded-xl border border-white/5 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+<div class="flex justify-between items-start mb-2">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">ACTIVE USERS</p>
+<h2 class="font-headline-md text-headline-md text-on-surface">2.4M</h2>
+</div>
+<div class="bg-tertiary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-tertiary">group</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-4">
+<span class="material-symbols-outlined text-emerald-400 text-sm">trending_up</span>
+<span class="font-label-caps text-label-caps text-emerald-400">+5% vs last month</span>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-1 bg-surface-variant">
+<div class="h-full bg-tertiary w-[85%]"></div>
+</div>
+</div>
+<!-- Metric 3 -->
+<div class="bg-[#141416] p-5 rounded-xl border border-white/5 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+<div class="flex justify-between items-start mb-2">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1">SYSTEM LOAD</p>
+<h2 class="font-headline-md text-headline-md text-on-surface">42%</h2>
+</div>
+<div class="bg-error/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-error">memory</span>
+</div>
+</div>
+<div class="flex items-center gap-2 mt-4">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">trending_flat</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Stable</span>
+</div>
+<div class="absolute bottom-0 left-0 w-full h-1 bg-surface-variant">
+<div class="h-full bg-error w-[42%]"></div>
+</div>
+</div>
+</div>
+<!-- Recent Jobs Section -->
+<div class="mt-4">
+<h3 class="font-body-lg text-body-lg font-bold text-on-surface mb-4">Recent Processing Jobs</h3>
+<div class="flex flex-col gap-3">
+<!-- Job Item 1 -->
+<div class="bg-[#141416] border border-white/5 p-4 rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm">4k</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold line-clamp-1">Interstellar (Remaster)</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Transcoding - 85%</p>
+</div>
+</div>
+<div class="w-8 h-8 rounded-full border border-primary/30 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xs animate-spin">sync</span>
+</div>
+</div>
+<!-- Job Item 2 -->
+<div class="bg-[#141416] border border-white/5 p-4 rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">subtitles</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold line-clamp-1">Dune: Part Two</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Auto-Captions - Done</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-emerald-400">check_circle</span>
+</div>
+<!-- Job Item 3 -->
+<div class="bg-[#141416] border border-white/5 p-4 rounded-lg flex items-center justify-between opacity-70">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">movie</span>
+</div>
+<div>
+<p class="font-body-md text-body-md text-on-surface font-semibold line-clamp-1">Project Hail Mary</p>
+<p class="font-label-caps text-label-caps text-on-surface-variant">Ingest - Queued</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant">schedule</span>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Shared Component implementation for Mobile) -->
+<!-- Active State Logic: Dashboard/Home is active -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-3 px-4 lg:hidden bg-surface/80 backdrop-blur-lg border-t border-white/10" style="box-shadow: 0px -8px 24px rgba(0,0,0,0.5);">
+<!-- Active Tab: Dashboard (Mapped to Home in the BottomNav array conceptually for the admin context) -->
+<button class="flex flex-col items-center justify-center text-primary active:bg-surface-variant p-2 rounded-lg scale-110 transition-transform">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-caps text-[10px] mt-1">Dashboard</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined">movie</span>
+<span class="font-label-caps text-[10px] mt-1">Content</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-caps text-[10px] mt-1">Users</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="font-label-caps text-[10px] mt-1">Analytics</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant p-2 rounded-lg">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-caps text-[10px] mt-1">Settings</span>
+</button>
+</nav>
+</body></html>

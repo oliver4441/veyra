@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Midnight Echo - Veyra</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed-variant": "#930007",
+                      "primary-fixed-dim": "#d0bcff",
+                      "on-error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#c8c6c8",
+                      "tertiary-container": "#ff5447",
+                      "error-container": "#93000a",
+                      "outline": "#958ea0",
+                      "surface": "#131314",
+                      "surface-container-low": "#1c1b1c",
+                      "inverse-primary": "#6d3bd7",
+                      "surface-dim": "#131314",
+                      "secondary-fixed": "#e5e1e4",
+                      "on-tertiary-container": "#5c0002",
+                      "inverse-on-surface": "#313031",
+                      "on-secondary-fixed-variant": "#474649",
+                      "tertiary-fixed-dim": "#ffb4aa",
+                      "on-tertiary-fixed": "#410001",
+                      "on-primary-fixed": "#23005c",
+                      "secondary": "#c8c6c8",
+                      "on-primary-container": "#340080",
+                      "background": "#131314",
+                      "surface-container": "#201f20",
+                      "on-surface": "#e5e2e3",
+                      "primary-container": "#a078ff",
+                      "tertiary": "#ffb4aa",
+                      "surface-bright": "#3a393a",
+                      "surface-variant": "#353436",
+                      "surface-container-lowest": "#0e0e0f",
+                      "on-secondary": "#303032",
+                      "on-secondary-fixed": "#1b1b1d",
+                      "on-primary-fixed-variant": "#5516be",
+                      "surface-container-high": "#2a2a2b",
+                      "surface-container-highest": "#353436",
+                      "inverse-surface": "#e5e2e3",
+                      "secondary-container": "#474649",
+                      "primary": "#d0bcff",
+                      "tertiary-fixed": "#ffdad5",
+                      "surface-tint": "#d0bcff",
+                      "on-primary": "#3c0091",
+                      "on-error": "#690005",
+                      "outline-variant": "#494454",
+                      "on-secondary-container": "#b7b4b7",
+                      "on-tertiary": "#690003",
+                      "primary-fixed": "#e9ddff",
+                      "on-background": "#e5e2e3",
+                      "on-surface-variant": "#cbc3d7",
+                      "error": "#ffb4ab"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "section-gap": "80px",
+                      "grid-margin-mobile": "20px",
+                      "grid-margin-desktop": "64px",
+                      "container-max": "1440px",
+                      "content-gap": "24px",
+                      "gutter": "24px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-caps": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "display-xl": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-caps": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.1em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-xl": [
+                              "72px",
+                              {
+                                      "lineHeight": "80px",
+                                      "letterSpacing": "-0.04em",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+      </script>
+<style>
+        body {
+            background-color: #0A0A0B;
+            color: #e5e2e3;
+        }
+        .glass-panel {
+            background: rgba(20, 20, 22, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .violet-glow {
+            box-shadow: inset 0 0 10px rgba(208, 188, 255, 0.2), 0 0 15px rgba(208, 188, 255, 0.1);
+        }
+        .cinematic-gradient {
+            background: linear-gradient(to top, #0A0A0B 0%, rgba(10, 10, 11, 0.8) 40%, rgba(10, 10, 11, 0) 100%);
+        }
+        .card-hover:hover {
+            transform: scale(1.05);
+            border-bottom: 2px solid #d0bcff;
+        }
+      </style>
+</head>
+<body class="antialiased min-h-screen relative overflow-x-hidden">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-grid-margin-desktop py-4 bg-transparent backdrop-blur-md shadow-2xl bg-surface/70 backdrop-blur-xl border-b border-white/10 hidden md:flex transition-all duration-300" id="topNav">
+<div class="flex items-center gap-8">
+<a class="font-headline-md text-headline-md font-bold tracking-tighter text-primary" href="#">Veyra</a>
+<div class="flex gap-6">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors" href="#">Home</a>
+<a class="font-label-caps text-label-caps text-primary font-bold border-b-2 border-primary pb-1" href="#">Movies</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors" href="#">Series</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-on-surface transition-colors" href="#">Genres</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface hover:text-primary transition-colors hover:scale-105 transition-transform duration-300">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="text-on-surface hover:text-primary transition-colors hover:scale-105 transition-transform duration-300">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+</button>
+<button class="text-on-surface hover:text-primary transition-colors hover:scale-105 transition-transform duration-300">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full border border-white/20 hover:scale-105 transition-transform duration-300 object-cover" data-alt="A small circular user profile avatar with a cinematic dramatic lighting, showcasing a mysterious stylized portrait in deep charcoal and violet tones, fitting a premium streaming interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB877u6GLqUJp8dlkDsIGH8Dxbn4DEzZuArW1bXTstmu4uM8pCTdlNj6L_lmnBLWSziMqg1wu2L1aV4se2OUVrXYZGpfJ1d6SpZl1Kug4DLdOaGaq4mJ5jRz_UE2nUTBKx1a-fycY_xgEGC6CjXZYTT6Xn2BMAGr3PszaDM4Znp6uyRQ2d7lIxu0ZNHm83MZLa4StblBDlo9eqpaXLRg9Qe41bufLZ0EtQqIST-k729fPlmwH7rQ2ceNQ"/>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="w-full">
+<!-- Backdrop Section -->
+<section class="relative w-full h-[716px] md:h-[870px]">
+<div class="absolute inset-0 w-full h-full">
+<div class="bg-cover bg-center bg-no-repeat w-full h-full opacity-60" data-alt="A vast, high-resolution cinematic backdrop depicting a tense sci-fi thriller scene. A lone cryptographer stands before massive screens glowing with cryptic signals in a dark, atmospheric control room. Deep blacks, vivid violet accents, and volumetric lighting create a mood of technological suspense and mystery, perfectly aligned with the cinematic glassmorphism aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA8WlDBIhUQo32svgICciRtBTANMP8lYe22rIgH6tVkap2yh2IqkIXN1Da3Y4hN6VkE4TzGsSi4DHrZ4NaOSxXEvPzXUlGhMvvkPJiO4PMnnm5GSfLWKOLCiZbqsu6YsrqwYCF5P6lhP9ROhiZD7RC-F5GTPDl6C7eVlr1EcKuNQMpHhtQyf0tTPR5-YB9BmlSvBCdMGn3WIkQpxziUiPfSF-kn3TyTUcl-1FbltoLbluDfHegA-CL4Og')"></div>
+<div class="absolute inset-0 cinematic-gradient"></div>
+</div>
+<!-- Info Header -->
+<div class="absolute bottom-0 w-full px-grid-margin-mobile md:px-grid-margin-desktop pb-section-gap max-w-container-max mx-auto left-0 right-0 z-10 flex flex-col md:flex-row gap-8 items-end">
+<!-- Poster -->
+<div class="w-48 md:w-72 shrink-0 rounded-xl overflow-hidden shadow-[0px_24px_48px_rgba(0,0,0,0.8)] border border-white/10 hidden md:block">
+<img alt="The Midnight Echo Poster" class="w-full h-auto object-cover" data-alt="A high-contrast movie poster portrait for a sci-fi thriller. The artwork features a silhouetted figure against a backdrop of glowing digital code and shattered glass. The color palette is dominated by deep charcoal and electric violet, radiating a premium, mysterious cinematic vibe." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmeAH2ZURYuGE0fX7jsqzvYmYxr4VP4nGCI50pmK47C0MNxkfChHr-frAdWozUoK6tQnJwk4HThU0dxKnEgM-hoRc0qCVBXwe5PEvqRCq39bsNn4LBKOysFs5bYJQcsBXLI3YpXEI7FnKe1N5w8R3ShnYxHCCuEAvm5Jq5sw8Lo0kbv5Ax-OBgsZx5cBtsRFZFIJF_L03yZiL7hKV_pL5zsz87ncaCrOM6XLBbF1-qXZSolpGXkCWGpw"/>
+</div>
+<!-- Details -->
+<div class="flex flex-col gap-6 w-full max-w-3xl">
+<div class="flex flex-col gap-2">
+<h1 class="font-display-xl text-headline-lg-mobile md:text-display-xl text-white drop-shadow-lg">The Midnight Echo</h1>
+<div class="flex flex-wrap items-center gap-4 text-on-surface-variant font-body-md text-body-md">
+<span>2024</span>
+<span class="w-1 h-1 rounded-full bg-surface-variant"></span>
+<span>2h 15m</span>
+<span class="w-1 h-1 rounded-full bg-surface-variant"></span>
+<span class="px-2 py-0.5 rounded glass-panel text-white text-xs font-bold border border-white/20">PG-13</span>
+</div>
+</div>
+<!-- Media Chips -->
+<div class="flex gap-2">
+<span class="px-4 py-1 rounded-full bg-white/10 text-white font-label-caps text-label-caps border border-white/10">SCI-FI</span>
+<span class="px-4 py-1 rounded-full bg-white/10 text-white font-label-caps text-label-caps border border-white/10">THRILLER</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface text-opacity-90 leading-relaxed max-w-2xl drop-shadow-md">
+                        When a mysterious signal disrupts global communications, a rogue cryptographer must decode the truth before the silence becomes permanent.
+                    </p>
+<!-- Crew -->
+<div class="flex flex-col gap-1 font-body-md text-body-md text-on-surface-variant">
+<p><span class="text-white font-semibold">Director:</span> Christopher Nolan</p>
+<p><span class="text-white font-semibold">Cast:</span> John Doe, Jane Smith, Alan Turing</p>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-4 mt-2">
+<button class="bg-primary text-on-primary font-bold font-body-lg text-body-lg px-8 py-3 rounded-lg flex items-center gap-2 hover:bg-primary-fixed transition-colors violet-glow shadow-lg">
+<span class="material-symbols-outlined" data-icon="play_arrow" data-weight="fill">play_arrow</span>
+                            Play
+                        </button>
+<button class="w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+<button class="w-12 h-12 rounded-full glass-panel flex items-center justify-center text-white hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined" data-icon="share">share</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<div class="px-grid-margin-mobile md:px-grid-margin-desktop max-w-container-max mx-auto space-y-section-gap py-section-gap">
+<!-- More Like This -->
+<section class="space-y-content-gap">
+<h2 class="font-headline-md text-headline-md text-white border-l-4 border-primary pl-4">More Like This</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+<!-- Card 1 -->
+<a class="group block relative rounded-xl overflow-hidden bg-[#141416] border border-white/5 card-hover transition-all duration-300" href="#">
+<div class="aspect-[2/3] w-full overflow-hidden">
+<img alt="Movie Suggestion 1" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A stylized movie poster for a suspenseful thriller, featuring a dimly lit urban landscape with heavy rain and a lone figure in a trench coat. Deep blacks and moody neon purple lighting define the aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDfYBDBcEczCwGgbPuIrpUYDBgzEeRiLmDxR-LZWADB3QWJZSe0dmoyuOWeyE2IR5e_-kBgAHVd2s7xWzAJVkSkl5lmoJjJm0tN3WncqPHG3c7GDoCSkkujwRmWJ6B8g6E-BF7_FJDxfJZ04iyOHqWAxzp2MLq7rW7KaPHJ_p45iTcFfjdo7aU6OVpgdDkRsXQmRvqZCgeP-f2mbE5oHI8lTap-yQkQogm4DypqXEpSkqA07FQjiCGqQ"/>
+</div>
+<div class="p-3 bg-gradient-to-t from-black/90 to-transparent absolute bottom-0 w-full">
+<h3 class="font-body-md text-body-md font-semibold text-white truncate">Silent Frequency</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">2023</p>
+</div>
+</a>
+<!-- Card 2 -->
+<a class="group block relative rounded-xl overflow-hidden bg-[#141416] border border-white/5 card-hover transition-all duration-300" href="#">
+<div class="aspect-[2/3] w-full overflow-hidden">
+<img alt="Movie Suggestion 2" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A premium sci-fi movie poster showing a sleek, futuristic space station orbiting a dark, textured planet. High contrast lighting with brilliant white highlights against infinite space, subtle violet nebulas in the background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHPepHRpKd8JPuCspFgq4nthGP6e217hX_I9nSiRdd8nfQoexcYwYFOul8QLkB7hiTDLta02O-dER9W07c7g6eJhpmPbaLy9F90tRuWXYm7tCr9jbv4Lun1pEwois3-J_Omd-YV9gpLTalfIend62HQVVSr02AW4wixKSs3yYAloXp9wMKIXn_NIiX9S5jsCdD3zoAY3_CQBfWixBYGq8WN9MkFPcljLAFT0kA6I6uLyZCUdKdbaWpBg"/>
+</div>
+<div class="p-3 bg-gradient-to-t from-black/90 to-transparent absolute bottom-0 w-full">
+<h3 class="font-body-md text-body-md font-semibold text-white truncate">Orbit's End</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">2021</p>
+</div>
+</a>
+<!-- Card 3 -->
+<a class="group block relative rounded-xl overflow-hidden bg-[#141416] border border-white/5 card-hover transition-all duration-300" href="#">
+<div class="aspect-[2/3] w-full overflow-hidden">
+<img alt="Movie Suggestion 3" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A mysterious cinematic movie poster showing a glowing, intricate puzzle box levitating in a dark void. The light cast is a strong, electric violet, illuminating intricate geometric patterns." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEOZeAy5o-z3PITdkjy8S51lPX1Otlf6phN_eb_SCeoBVrV_SL0yWUvs9af0zinngtGDuphWWjTYE5ZrIMP8GbcK3xhkMn2j_16yc3O-RPeOCRt3YCYTqWeDq8XRGCPiHDyUWg2wpM_okQY9ylUAZLquBRtPfpuOin0z2dNp9FRoFs0s4JcJ7vfgRrVIkQ7Ov_dUMJUMEGSMBhkjyAwqUiS6fJ6PZFkeIedB5cRtLDfTcSVZfaqlpH1w"/>
+</div>
+<div class="p-3 bg-gradient-to-t from-black/90 to-transparent absolute bottom-0 w-full">
+<h3 class="font-body-md text-body-md font-semibold text-white truncate">The Enigma Code</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">2022</p>
+</div>
+</a>
+<!-- Card 4 -->
+<a class="group block relative rounded-xl overflow-hidden bg-[#141416] border border-white/5 card-hover transition-all duration-300" href="#">
+<div class="aspect-[2/3] w-full overflow-hidden">
+<img alt="Movie Suggestion 4" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="A gritty thriller movie poster portraying a close-up of an eye reflecting lines of digital code. The color grading is extremely dark, with only stark white and deep violet tones visible." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTXxlGe_5qvaUHYeIop4p6hP6uClGHKVHlEHh_UEstmvLVQC5QeRYGJrPg5DUSAZErhDIj7H-QS-U3SrCUUe83C6tqK90Kh-GQmlqJQYBo-c5CBFzqdR1j9iEmC42bxly_tGxhcLgfM1lO60D1objSR1e0qgmxnSwxIWzClRi1o8z8BzOWEUV9wLXxkMDVvfYotl6R2l7LCfyShmS4_6lY6EkssAQQ-YT__EA-b8AAuQ2OgG8YmZ2Emg"/>
+</div>
+<div class="p-3 bg-gradient-to-t from-black/90 to-transparent absolute bottom-0 w-full">
+<h3 class="font-body-md text-body-md font-semibold text-white truncate">Cipher</h3>
+<p class="font-label-caps text-label-caps text-on-surface-variant">2025</p>
+</div>
+</a>
+</div>
+</section>
+<!-- Reviews Section -->
+<section class="space-y-content-gap max-w-4xl">
+<h2 class="font-headline-md text-headline-md text-white border-l-4 border-primary pl-4">Community Reviews</h2>
+<div class="space-y-6">
+<!-- Review Item -->
+<div class="p-6 rounded-xl bg-[#141416] border border-white/5 flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant font-bold">
+                                    M
+                                </div>
+<div>
+<h4 class="font-body-md text-body-md font-semibold text-white">MovieCritic99</h4>
+<div class="flex text-primary text-sm">
+<span class="material-symbols-outlined text-[16px]" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[16px]" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[16px]" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[16px]" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[16px]" data-weight="fill">star_half</span>
+</div>
+</div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">2 days ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            An absolute masterpiece of suspense. The pacing is relentless and the visual aesthetic is unlike anything else this year. The ending left me speechless.
+                        </p>
+</div>
+<!-- Review Item -->
+<div class="p-6 rounded-xl bg-[#141416] border border-white/5 flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant flex items-center justify-center text-on-surface-variant font-bold">
+                                    S
+                                </div>
+<div>
+<h4 class="font-body-md text-body-md font-semibold text-white">SciFiFanatic</h4>
+<div class="flex text-primary text-sm">
+<span class="material-symbols-outlined text-[16px]" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[16px]" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[16px]" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[16px]" data-weight="fill">star</span>
+<span class="material-symbols-outlined text-[16px]">star</span>
+</div>
+</div>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">1 week ago</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            Strong performances and a chilling premise. The technical jargon sometimes gets in the way, but overall a solid entry into the genre.
+                        </p>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center py-3 px-4 lg:hidden bg-surface/80 backdrop-blur-lg border-t border-white/10 shadow-[0px_-8px_24px_rgba(0,0,0,0.5)] rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-caps text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="explore">explore</span>
+<span class="font-label-caps text-[10px]">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary scale-110 transition-transform p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="search" data-weight="fill">search</span>
+<span class="font-label-caps text-[10px] font-bold">Search</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="download">download</span>
+<span class="font-label-caps text-[10px]">Downloads</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant active:bg-surface-variant p-2 rounded-lg" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-caps text-[10px]">Profile</span>
+</a>
+</nav>
+<script>
+        // Subtle navbar background transition on scroll
+        const topNav = document.getElementById('topNav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                topNav.classList.add('bg-surface/90', 'border-white/10');
+                topNav.classList.remove('bg-transparent');
+            } else {
+                topNav.classList.remove('bg-surface/90', 'border-white/10');
+                topNav.classList.add('bg-transparent');
+            }
+        });
+    </script>
+</body></html>
