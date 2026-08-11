@@ -8,6 +8,8 @@ import { watchRoutes } from './routes/watch';
 import { adminRoutes } from './routes/admin';
 import { genreRoutes } from './routes/genres';
 import { storageRoutes } from './routes/storage';
+import { getDb } from './lib/db';
+import { storageAccounts } from './db/schema';
 
 // Environment bindings
 export interface Env {
@@ -25,13 +27,18 @@ const app = new Hono<{ Bindings: Env }>();
 // CORS middleware - allow frontend origins
 app.use('*', cors({
   origin: (c) => {
-    const allowedOrigins = c.env.CORS_ORIGIN?.split(',') || [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://veyra.vercel.app',
-    ];
-    const origin = c.req.header('Origin') || '';
-    return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+    try {
+      const allowedOrigins = c.env?.CORS_ORIGIN?.split(',') || [
+        'http://localhost:3000',
+        'http://localhost:5173',
+        'https://web-jade-one-82.vercel.app',
+        'https://veyra.vercel.app',
+      ];
+      const origin = c.req.header('Origin') || '';
+      return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+    } catch {
+      return '*';
+    }
   },
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
@@ -53,6 +60,35 @@ app.route('/api/auth', authRoutes);
 app.route('/api/movies', movieRoutes);
 app.route('/api/search', searchRoutes);
 app.route('/api/genres', genreRoutes);
+
+// Test R2 endpoint
+app.get('/api/test-r2', async (c) => {
+  try {
+    const bucket = c.env.R2_BUCKET;
+    if (!bucket) {
+      return c.json({ error: 'R2_BUCKET not available' });
+    }
+    const listed = await bucket.list({ limit: 10 });
+    return c.json({ 
+      success: true, 
+      bucketExists: true,
+      objects: listed.objects.map(o => o.key)
+    });
+  } catch (error: any) {
+    return c.json({ error: error.message });
+  }
+});
+
+// Test database endpoint
+app.get('/api/test-db', async (c) => {
+  try {
+    const db = getDb(c.env.DATABASE_URL);
+    const result = await db.select().from(storageAccounts).limit(1);
+    return c.json({ success: true, accounts: result });
+  } catch (error: any) {
+    return c.json({ error: error.message });
+  }
+});
 
 // Protected routes (require JWT)
 app.use('/api/watch/*', jwt({ secret: (c) => c.env.JWT_SECRET, alg: 'HS256' }));
