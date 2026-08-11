@@ -9,7 +9,10 @@ import type { Env } from '../index';
 const storage = new Hono<{ Bindings: Env }>();
 
 // Helper to create R2 provider from environment
-function createR2Provider(env: Env): CloudflareR2Provider {
+function createR2Provider(env: Env): CloudflareR2Provider | null {
+  if (!env.R2_BUCKET) {
+    return null;
+  }
   return new CloudflareR2Provider({
     bucket: env.R2_BUCKET,
     publicDomain: env.R2_PUBLIC_DOMAIN,
@@ -201,6 +204,15 @@ storage.post('/accounts/:id/test', async (c) => {
 
   // For R2 default, test directly
   if (accountId === 'r2-default') {
+    if (!r2) {
+      return c.json({
+        health: {
+          status: 'error',
+          message: 'R2 bucket not configured',
+          lastChecked: new Date(),
+        },
+      });
+    }
     const health = await r2.healthCheck();
     
     // Update health status in database
@@ -234,8 +246,15 @@ storage.get('/quota', async (c) => {
   const r2 = createR2Provider(c.env);
   const db = getDb(c.env.DATABASE_URL);
 
-  // Get R2 usage
-  const r2Usage = await r2.getUsage();
+  // Get R2 usage if available
+  let r2Usage = null;
+  if (r2) {
+    try {
+      r2Usage = await r2.getUsage();
+    } catch {
+      // Ignore errors
+    }
+  }
 
   // Get total file count and size from database
   const [fileStats] = await db
@@ -246,7 +265,7 @@ storage.get('/quota', async (c) => {
     .from(mediaFiles);
 
   return c.json({
-    r2: {
+    r2: r2Usage ? {
       used: r2Usage.used,
       available: r2Usage.available,
       total: r2Usage.total,
@@ -254,6 +273,14 @@ storage.get('/quota', async (c) => {
       usedFormatted: r2Usage.usedFormatted,
       availableFormatted: r2Usage.availableFormatted,
       totalFormatted: r2Usage.totalFormatted,
+    } : {
+      used: 0,
+      available: 10 * 1024 * 1024 * 1024,
+      total: 10 * 1024 * 1024 * 1024,
+      percentage: 0,
+      usedFormatted: '0 Bytes',
+      availableFormatted: '10 GB',
+      totalFormatted: '10 GB',
     },
     files: {
       count: fileStats.count,
@@ -266,6 +293,10 @@ storage.get('/quota', async (c) => {
 storage.post('/upload/movie', async (c) => {
   const userId = (c as any).get('userId') as number;
   const r2 = createR2Provider(c.env);
+
+  if (!r2) {
+    return c.json({ error: 'R2 storage not configured' }, 503);
+  }
 
   try {
     const formData = await c.req.formData();
@@ -338,6 +369,10 @@ storage.post('/upload/image', async (c) => {
   const userId = (c as any).get('userId') as number;
   const r2 = createR2Provider(c.env);
 
+  if (!r2) {
+    return c.json({ error: 'R2 storage not configured' }, 503);
+  }
+
   try {
     const formData = await c.req.formData();
     const file = formData.get('file') as File;
@@ -401,6 +436,10 @@ storage.get('/download/:key', async (c) => {
   const key = c.req.param('key');
   const r2 = createR2Provider(c.env);
 
+  if (!r2) {
+    return c.json({ error: 'R2 storage not configured' }, 503);
+  }
+
   try {
     const url = await r2.getDownloadUrl(key);
     const metadata = await r2.getMetadata(key);
@@ -421,6 +460,10 @@ storage.delete('/:key', async (c) => {
   const key = c.req.param('key');
   const r2 = createR2Provider(c.env);
 
+  if (!r2) {
+    return c.json({ error: 'R2 storage not configured' }, 503);
+  }
+
   try {
     await r2.delete(key);
 
@@ -437,6 +480,11 @@ storage.delete('/:key', async (c) => {
 // GET /api/storage/list - List files
 storage.get('/list', async (c) => {
   const r2 = createR2Provider(c.env);
+
+  if (!r2) {
+    return c.json({ error: 'R2 storage not configured' }, 503);
+  }
+
   const prefix = c.req.query('prefix') || '';
   const limit = parseInt(c.req.query('limit') || '50');
   const cursor = c.req.query('cursor');

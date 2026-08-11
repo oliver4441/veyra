@@ -15,7 +15,7 @@ export interface Env {
   JWT_SECRET: string;
   CORS_ORIGIN: string;
   ENVIRONMENT: string;
-  R2_BUCKET: R2Bucket;
+  R2_BUCKET?: R2Bucket;
   R2_PUBLIC_DOMAIN?: string;
 }
 
@@ -55,9 +55,9 @@ app.route('/api/search', searchRoutes);
 app.route('/api/genres', genreRoutes);
 
 // Protected routes (require JWT)
-app.use('/api/watch/*', jwt({ secret: (c) => c.env.JWT_SECRET }));
-app.use('/api/admin/*', jwt({ secret: (c) => c.env.JWT_SECRET }));
-app.use('/api/storage/*', jwt({ secret: (c) => c.env.JWT_SECRET }));
+app.use('/api/watch/*', jwt({ secret: (c) => c.env.JWT_SECRET, alg: 'HS256' }));
+app.use('/api/admin/*', jwt({ secret: (c) => c.env.JWT_SECRET, alg: 'HS256' }));
+app.use('/api/storage/*', jwt({ secret: (c) => c.env.JWT_SECRET, alg: 'HS256' }));
 app.route('/api/watch', watchRoutes);
 app.route('/api/admin', adminRoutes);
 app.route('/api/storage', storageRoutes);

@@ -7,14 +7,14 @@
   "vars": {
     "ENVIRONMENT": "development"
   },
-  // R2 Bucket Binding
-  "r2_buckets": [
-    {
-      "binding": "R2_BUCKET",
-      "bucket_name": "veyra-media",
-      "preview_bucket_name": "veyra-media-preview"
-    }
-  ],
+  // R2 Bucket Binding (uncomment when R2 is enabled)
+  // "r2_buckets": [
+  //   {
+  //     "binding": "R2_BUCKET",
+  //     "bucket_name": "veyra-media",
+  //     "preview_bucket_name": "veyra-media-preview"
+  //   }
+  // ],
   "dev": {
     "port": 8787,
     "local_protocol": "http"
@@ -24,13 +24,6 @@
       "vars": {
         "ENVIRONMENT": "staging"
       },
-      "r2_buckets": [
-        {
-          "binding": "R2_BUCKET",
-          "bucket_name": "veyra-media-staging",
-          "preview_bucket_name": "veyra-media-staging-preview"
-        }
-      ],
       "routes": [
         {
           "pattern": "api-staging.veyra.app/*",
@@ -42,12 +35,6 @@
       "vars": {
         "ENVIRONMENT": "production"
       },
-      "r2_buckets": [
-        {
-          "binding": "R2_BUCKET",
-          "bucket_name": "veyra-media"
-        }
-      ],
       "routes": [
         {
           "pattern": "api.veyra.app/*",
