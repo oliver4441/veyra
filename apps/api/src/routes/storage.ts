@@ -195,4 +195,117 @@ storage.post('/upload/movie', async (c) => {
   }
 });
 
+// POST /api/storage/upload/image - Upload an image file (poster, backdrop, etc.)
+storage.post('/upload/image', async (c) => {
+  const r2 = createR2Provider(c.env);
+  
+  if (!r2) {
+    return c.json({ error: 'R2 storage not configured' }, 503);
+  }
+
+  try {
+    const formData = await c.req.formData();
+    const file = formData.get('file') as File;
+    const movieId = formData.get('movieId') as string;
+    const type = formData.get('type') as string || 'poster';
+
+    if (!file) {
+      return c.json({ error: 'File is required' }, 400);
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      return c.json({ error: 'File must be an image' }, 400);
+    }
+
+    // Generate R2 key for image
+    const timestamp = Date.now();
+    const ext = file.name.split('.').pop() || 'jpg';
+    const key = `veyra/images/${type}/${movieId || 'unknown'}_${timestamp}.${ext}`;
+
+    // Upload to R2
+    const arrayBuffer = await file.arrayBuffer();
+    const result = await r2.upload({
+      key,
+      body: arrayBuffer,
+      contentType: file.type,
+      metadata: {
+        type,
+        movieId: movieId || '',
+      },
+    });
+
+    // If movieId provided, save to database
+    let mediaFile = null;
+    if (movieId) {
+      const db = getDb(c.env.DATABASE_URL);
+      [mediaFile] = await db
+        .insert(mediaFiles)
+        .values({
+          movieId: parseInt(movieId),
+          storageAccountId: 'r2-default',
+          externalFileId: result.key,
+          objectPath: result.key,
+          publicUrl: result.url,
+          originalFilename: file.name,
+          mimeType: file.type,
+          fileSize: file.size,
+          quality: 'original' as any,
+          status: 'uploaded',
+        })
+        .returning();
+    }
+
+    return c.json({
+      success: true,
+      file: {
+        id: mediaFile?.id,
+        key: result.key,
+        url: result.url,
+        size: file.size,
+      },
+    }, 201);
+  } catch (error: any) {
+    console.error('Upload error:', error);
+    return c.json({ error: error.message || 'Upload failed' }, 500);
+  }
+});
+
+// DELETE /api/storage/files/:id - Delete a file
+storage.delete('/files/:id', async (c) => {
+  const r2 = createR2Provider(c.env);
+  const fileId = parseInt(c.req.param('id'));
+
+  try {
+    const db = getDb(c.env.DATABASE_URL);
+    
+    // Get file record
+    const [file] = await db
+      .select()
+      .from(mediaFiles)
+      .where(eq(mediaFiles.id, fileId))
+      .limit(1);
+
+    if (!file) {
+      return c.json({ error: 'File not found' }, 404);
+    }
+
+    // Delete from R2 if available
+    if (r2 && file.objectPath) {
+      try {
+        await r2.delete(file.objectPath);
+      } catch (error) {
+        console.error('Failed to delete from R2:', error);
+      }
+    }
+
+    // Delete from database
+    await db.delete(mediaFiles).where(eq(mediaFiles.id, fileId));
+
+    return c.json({ success: true });
+  } catch (error: any) {
+    return c.json({ error: error.message || 'Delete failed' }, 500);
+  }
+});
+
 export { storage as storageRoutes };
