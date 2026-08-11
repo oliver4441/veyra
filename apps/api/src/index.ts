@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { jwt } from 'hono/jwt';
 import { authRoutes } from './routes/auth';
 import { movieRoutes } from './routes/movies';
 import { searchRoutes } from './routes/search';
@@ -9,6 +8,7 @@ import { adminRoutes } from './routes/admin';
 import { genreRoutes } from './routes/genres';
 import { storageRoutes } from './routes/storage';
 import { getDb } from './lib/db';
+import { verifyToken } from './lib/auth';
 import { storageAccounts } from './db/schema';
 
 // Environment bindings
@@ -90,10 +90,25 @@ app.get('/api/test-db', async (c) => {
   }
 });
 
+// Custom JWT middleware using jose (compatible with our auth library)
+const authMiddleware = async (c: any, next: any) => {
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return c.json({ error: 'Missing or invalid Authorization header' }, 401);
+  }
+  const token = authHeader.slice(7);
+  const payload = await verifyToken(token, c.env.JWT_SECRET);
+  if (!payload) {
+    return c.json({ error: 'Invalid or expired token' }, 401);
+  }
+  c.set('jwtPayload', payload);
+  await next();
+};
+
 // Protected routes (require JWT)
-app.use('/api/watch/*', jwt({ secret: (c) => c.env.JWT_SECRET, alg: 'HS256' }));
-app.use('/api/admin/*', jwt({ secret: (c) => c.env.JWT_SECRET, alg: 'HS256' }));
-app.use('/api/storage/*', jwt({ secret: (c) => c.env.JWT_SECRET, alg: 'HS256' }));
+app.use('/api/watch/*', authMiddleware);
+app.use('/api/admin/*', authMiddleware);
+app.use('/api/storage/*', authMiddleware);
 app.route('/api/watch', watchRoutes);
 app.route('/api/admin', adminRoutes);
 app.route('/api/storage', storageRoutes);
