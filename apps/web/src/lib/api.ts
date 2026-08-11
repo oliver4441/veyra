@@ -116,7 +116,8 @@ class ApiClient {
     this.accessToken = token;
   }
 
-  private async request<T>(
+  // Public request method for use by other services
+  async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
