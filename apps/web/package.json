@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "generate-icons": "node scripts/generate-icons.js",
+    "create-icons": "node scripts/create-placeholder-icons.js"
   },
   "dependencies": {
     "next": "^15.1.0",
