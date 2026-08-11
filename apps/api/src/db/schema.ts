@@ -24,7 +24,35 @@ export const rightsStatusEnum = pgEnum('rights_status', [
   'blocked',
 ]);
 export const mediaStatusEnum = pgEnum('media_status', ['draft', 'processing', 'published', 'archived']);
-export const storageProviderEnum = pgEnum('storage_provider', ['r2', 'b2', 's3']);
+export const storageProviderEnum = pgEnum('storage_provider', [
+  'cloudflare-r2',
+  'terabox',
+  'google-drive',
+  'backblaze-b2',
+  'dropbox',
+  'mega',
+  's3-compatible',
+]);
+export const storagePurposeEnum = pgEnum('storage_purpose', [
+  'primary-media',
+  'archive',
+  'posters-artwork',
+  'subtitles',
+  'trailers',
+  'backups',
+  'hot-storage',
+  'cold-storage',
+  'general',
+]);
+export const storageHealthEnum = pgEnum('storage_health', [
+  'connected',
+  'disconnected',
+  'auth-expired',
+  'error',
+  'rate-limited',
+  'storage-full',
+  'unavailable',
+]);
 export const qualityEnum = pgEnum('quality', ['480', '720', '1080', '4k']);
 
 // ==================== Users & Auth ====================
@@ -126,17 +154,46 @@ export const movieGenres = pgTable('movie_genres', {
   genreId: integer('genre_id').references(() => genres.id, { onDelete: 'cascade' }).notNull(),
 });
 
-// ==================== Storage ====================
+// ==================== Storage Accounts ====================
+
+export const storageAccounts = pgTable('storage_accounts', {
+  id: varchar('id', { length: 50 }).primaryKey(), // e.g., 'r2-default', 'tb_01', 'gdrive_01'
+  providerType: storageProviderEnum('provider_type').notNull(),
+  displayName: varchar('display_name', { length: 100 }).notNull(),
+  status: storageHealthEnum('status').default('connected').notNull(),
+  purpose: storagePurposeEnum('purpose').default('general').notNull(),
+  priority: integer('priority').default(5).notNull(), // 1-10, higher = preferred
+  isDefault: boolean('is_default').default(false).notNull(),
+  // Credentials (encrypted in production)
+  credentials: jsonb('credentials'), // Encrypted storage credentials
+  // Quota tracking
+  quotaTotal: integer('quota_total'), // in bytes
+  quotaUsed: integer('quota_used').default(0), // in bytes
+  // Health tracking
+  lastHealthCheck: timestamp('last_health_check'),
+  lastHealthStatus: storageHealthEnum('last_health_status'),
+  healthMessage: text('health_message'),
+  latencyMs: integer('latency_ms'),
+  // Metadata
+  capabilities: jsonb('capabilities').$type<Record<string, boolean>>(),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+  // Timestamps
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// ==================== Media Files ====================
 
 export const mediaFiles = pgTable('media_files', {
   id: serial('id').primaryKey(),
   movieId: integer('movie_id').references(() => movies.id, { onDelete: 'cascade' }),
   episodeId: integer('episode_id').references(() => episodes.id, { onDelete: 'cascade' }),
-  storageProvider: storageProviderEnum('storage_provider').default('r2').notNull(),
-  r2Key: text('r2_key'), // R2 object key (e.g., 'movies/123/video-1080.mp4')
-  r2Bucket: varchar('r2_bucket', { length: 100 }), // R2 bucket name
-  r2Region: varchar('r2_region', { length: 20 }).default('auto'),
+  // Storage reference
+  storageAccountId: varchar('storage_account_id', { length: 50 }).references(() => storageAccounts.id),
+  externalFileId: text('external_file_id'), // Provider-specific file ID
+  objectPath: text('object_path'), // Path in the storage bucket
   publicUrl: text('public_url'), // Public/custom domain URL if available
+  // File metadata
   originalFilename: varchar('original_filename', { length: 255 }),
   mimeType: varchar('mime_type', { length: 100 }),
   fileSize: integer('file_size'),
@@ -147,9 +204,11 @@ export const mediaFiles = pgTable('media_files', {
   bitrate: integer('bitrate'), // in kbps
   quality: qualityEnum('quality'),
   checksum: text('checksum'), // MD5 or SHA-256 of the file
+  // Status
   status: varchar('status', { length: 20 }).default('pending'), // pending, uploading, uploaded, processing, ready, error
   streamingEnabled: boolean('streaming_enabled').default(true),
   downloadEnabled: boolean('download_enabled').default(false),
+  // Timestamps
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
