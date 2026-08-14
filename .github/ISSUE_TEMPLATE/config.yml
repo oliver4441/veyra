@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/oliver4441/veyra/security/advisories/new
+    about: Please report security vulnerabilities privately instead of opening a public issue.
+  - name: Veyra Discussions
+    url: https://github.com/oliver4441/veyra/discussions
+    about: Ask questions, share ideas, and discuss Veyra with the community.
