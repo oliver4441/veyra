@@ -105,6 +105,23 @@ export const movies = pgTable('movies', {
   featured: boolean('featured').default(false),
   trending: boolean('trending').default(false),
   viewCount: integer('view_count').default(0),
+  // ── TMDB Metadata Fields ──
+  tmdbId: integer('tmdb_id'),
+  tmdbMediaType: varchar('tmdb_media_type', { length: 10 }), // 'movie' or 'tv'
+  originalTitle: varchar('original_title', { length: 255 }),
+  originalLanguage: varchar('original_language', { length: 10 }),
+  overview: text('overview'),
+  releaseDate: varchar('release_date', { length: 20 }),
+  voteAverage: real('vote_average'),
+  voteCount: integer('vote_count'),
+  popularity: real('popularity'),
+  posterPath: varchar('poster_path', { length: 255 }),
+  backdropPath: varchar('backdrop_path', { length: 255 }),
+  genres: jsonb('genres').$type<string[]>(), // TMDB genre names
+  productionCountries: jsonb('production_countries').$type<string[]>(),
+  spokenLanguages: jsonb('spoken_languages').$type<string[]>(),
+  statusTmdb: varchar('status_tmdb', { length: 50 }), // TMDB status: Returning, Ended, etc.
+  metadataUpdatedAt: timestamp('metadata_updated_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

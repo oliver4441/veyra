@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import type { Context, Next } from 'hono';
 import { cors } from 'hono/cors';
 import { authRoutes } from './routes/auth';
 import { movieRoutes } from './routes/movies';
@@ -7,8 +8,10 @@ import { watchRoutes } from './routes/watch';
 import { adminRoutes } from './routes/admin';
 import { genreRoutes } from './routes/genres';
 import { storageRoutes } from './routes/storage';
+import { discoveryRoutes } from './routes/discovery';
 import { getDb } from './lib/db';
 import { verifyToken } from './lib/auth';
+import type { AuthPayload } from './lib/auth';
 import { storageAccounts } from './db/schema';
 
 // Environment bindings
@@ -19,14 +22,24 @@ export interface Env {
   ENVIRONMENT: string;
   R2_BUCKET?: R2Bucket;
   R2_PUBLIC_DOMAIN?: string;
+  TMDB_API_READ_ACCESS_TOKEN: string;
 }
 
+// Shared context variables set by auth middleware
+export interface AppVariables {
+  jwtPayload: AuthPayload;
+  userId: number;
+  userRole: string;
+}
+
+export type AppContext = { Bindings: Env; Variables: AppVariables };
+
 // Create the main app
-const app = new Hono<{ Bindings: Env }>();
+const app = new Hono<AppContext>();
 
 // CORS middleware - allow frontend origins
 app.use('*', cors({
-  origin: (c) => {
+  origin: (origin, c) => {
     try {
       const allowedOrigins = c.env?.CORS_ORIGIN?.split(',') || [
         'http://localhost:3000',
@@ -34,7 +47,6 @@ app.use('*', cors({
         'https://web-jade-one-82.vercel.app',
         'https://veyra.vercel.app',
       ];
-      const origin = c.req.header('Origin') || '';
       return allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
     } catch {
       return '*';
@@ -60,6 +72,7 @@ app.route('/api/auth', authRoutes);
 app.route('/api/movies', movieRoutes);
 app.route('/api/search', searchRoutes);
 app.route('/api/genres', genreRoutes);
+app.route('/api/discovery', discoveryRoutes);
 
 // Test R2 endpoint
 app.get('/api/test-r2', async (c) => {
@@ -91,7 +104,7 @@ app.get('/api/test-db', async (c) => {
 });
 
 // Custom JWT middleware using jose (compatible with our auth library)
-const authMiddleware = async (c: any, next: any) => {
+const authMiddleware = async (c: Context<AppContext>, next: Next) => {
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return c.json({ error: 'Missing or invalid Authorization header' }, 401);
@@ -102,6 +115,8 @@ const authMiddleware = async (c: any, next: any) => {
     return c.json({ error: 'Invalid or expired token' }, 401);
   }
   c.set('jwtPayload', payload);
+  c.set('userId', payload.userId);
+  c.set('userRole', payload.role);
   await next();
 };
 

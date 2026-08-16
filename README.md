@@ -1,124 +1,59 @@
 # Veyra
 
-> A cinematic, self-hostable streaming platform built for a fast web experience, modern infrastructure, and contributor-friendly development.
-
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
-[![React](https://img.shields.io/badge/React-19-149eca?logo=react)](https://react.dev/)
-[![Cloudflare Workers](https://img.shields.io/badge/API-Cloudflare%20Workers-f38020?logo=cloudflare)](https://workers.cloudflare.com/)
-[![Neon](https://img.shields.io/badge/Database-Neon-00e699?logo=postgresql)](https://neon.tech/)
-[![Drizzle](https://img.shields.io/badge/ORM-Drizzle-C5F74F)](https://orm.drizzle.team/)
-
-Veyra separates the user experience, API, database, and object storage into clear layers so the project can scale without coupling the frontend to infrastructure details.
-
-## Contents
-
-- [Features](#features)
-- [Architecture](#architecture)
-- [Tech stack](#tech-stack)
-- [Repository structure](#repository-structure)
-- [Getting started](#getting-started)
-- [Environment variables](#environment-variables)
-- [Development](#development)
-- [API](#api)
-- [Deployment](#deployment)
-- [Security](#security)
-- [Contributing](#contributing)
-- [Community](#community)
-- [Funding](#funding)
-- [License](#license)
-
-## Features
-
-Veyra is designed around a cinematic streaming workflow with:
-
-- Responsive Next.js PWA frontend
-- Movie discovery, featured and trending content
-- Search and autocomplete
-- Authentication and session management
-- Watch progress and history
-- Watchlist management
-- Protected streaming URL generation
-- Admin movie and episode management
-- Audit logs and user administration
-- Cloudflare R2 media storage
-- Neon PostgreSQL database with Drizzle ORM
-- Cloudflare Workers API powered by Hono
-- Separate frontend/backend deployment targets
-
-The exact capabilities available in a deployment depend on the current implementation and configured infrastructure.
+A premium cinematic streaming platform built with Next.js, Cloudflare Workers, and Neon PostgreSQL.
 
 ## Architecture
 
-```text
-                         Veyra
-                           │
-             ┌─────────────┴─────────────┐
-             │                           │
-        Next.js PWA                Cloudflare Worker
-          (Vercel)                      (Hono)
-             │                           │
-             │                    ┌──────┴──────┐
-             │                    │             │
-             │                 Neon DB       Cloudflare R2
-             │                PostgreSQL     Media storage
-             │
-             └────────────── API requests ──────────────┘
+```
+┌─────────────────┐     ┌─────────────────────┐     ┌──────────────────┐
+│   Next.js App   │────▶│  Cloudflare Worker  │────▶│ Neon PostgreSQL  │
+│    (Vercel)     │     │  (Hono Framework)   │     │    (Database)    │
+└─────────────────┘     └─────────────────────┘     └──────────────────┘
 ```
 
-### Responsibilities
+## Tech Stack
 
-- **Web:** UI, routing, PWA experience, client-side interaction.
-- **API:** authentication, authorization, business logic, database access, storage operations.
-- **Database:** users, movies, watch state, watchlists, administration data, and related records.
-- **R2:** video, images, thumbnails, and other object assets.
+- **Frontend:** Next.js 15, React 19, Tailwind CSS, PWA
+- **Backend:** Cloudflare Workers, Hono Framework
+- **Database:** Neon PostgreSQL, Drizzle ORM
+- **Storage:** Cloudflare R2 (video, images, assets)
+- **Metadata/Discovery:** The Movie Database (TMDB) API v3
+- **Auth:** Custom JWT with PBKDF2 password hashing
+- **Deployment:** Vercel (frontend), Cloudflare (backend + storage)
 
-## Tech stack
+## Project Structure
 
-| Layer | Technology |
-| --- | --- |
-| Frontend | Next.js 15, React 19, Tailwind CSS, PWA |
-| Backend | Cloudflare Workers, Hono |
-| Database | Neon PostgreSQL |
-| ORM | Drizzle ORM |
-| Storage | Cloudflare R2 |
-| Authentication | JWT + PBKDF2 password hashing |
-| Frontend hosting | Vercel |
-| API/storage hosting | Cloudflare |
-
-## Repository structure
-
-```text
+```
 veyra/
 ├── apps/
-│   ├── web/             # Next.js frontend / PWA
-│   └── api/             # Cloudflare Worker API
+│   ├── web/          # Next.js frontend (PWA)
+│   └── api/          # Cloudflare Worker backend
+│       └── src/
+│           ├── lib/
+│           │   ├── tmdb.ts          # TMDB API service client
+│           │   └── ...              # Auth, DB, R2, storage
+│           ├── routes/
+│           │   ├── discovery.ts     # Public TMDB discovery endpoints
+│           │   ├── admin.ts         # Admin TMDB import/refresh
+│           │   └── ...              # Auth, movies, search, etc.
+│           └── db/schema.ts         # Drizzle schema (includes TMDB fields)
 ├── packages/
-│   ├── db/              # Shared database schema
-│   └── shared/          # Shared types and utilities
-├── templates/           # Design and HTML templates
-├── .github/             # Funding, issue templates, security/community docs
-├── CONTRIBUTING.md      # Contributor workflow
-├── SECURITY.md          # Security reporting policy
-└── plan.md              # Project specification / roadmap material
+│   ├── db/           # Shared database schema
+│   └── shared/       # Shared types and utilities
+├── templates/        # HTML design templates
+└── plan.md           # Full project specification
 ```
 
-## Getting started
+## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
 - npm 9+
-- A Neon PostgreSQL database
-- Wrangler CLI for API development/deployment
-- Vercel CLI if deploying the frontend from the CLI
+- Wrangler CLI (`npm install -g wrangler`)
+- Neon CLI (`npm install -g neonctl`)
 
-Optional tooling can be installed globally when needed:
-
-```bash
-npm install -g wrangler
-```
-
-### 1. Clone the repository
+### 1. Clone and Install
 
 ```bash
 git clone https://github.com/oliver4441/veyra.git
@@ -126,262 +61,244 @@ cd veyra
 npm install
 ```
 
-### 2. Configure local environment
-
-Use the example environment files supplied by the repository. Do not commit `.env`, `.dev.vars`, credentials, API keys, JWT secrets, or database passwords.
-
-For the API:
+### 2. Set Up Neon Database
 
 ```bash
-cp apps/api/.dev.vars.example apps/api/.dev.vars
-```
-
-Then populate the local values required by the current API configuration.
-
-### 3. Configure the database
-
-Veyra uses Neon PostgreSQL with Drizzle ORM.
-
-If you use the Neon CLI:
-
-```bash
+# Install neonctl if not installed
 npm install -g neonctl
+
+# Authenticate with Neon
 neonctl auth
+
+# Create a new project
+neonctl projects create --name veyra
+
+# Get the connection string
+neonctl connection-string
 ```
 
-Create or select a Neon project and provide its connection string through the local API environment configuration.
-
-### 4. Initialize the schema
-
-From the API workspace, use the repository's configured Drizzle commands. For a development database, the existing setup can be used with:
+### 3. Configure Environment Variables
 
 ```bash
+# Copy the example file
+cp apps/api/.dev.vars.example apps/api/.dev.vars
+
+# Edit .dev.vars with your Neon connection string and JWT secret
+```
+
+### 4. Initialize Database
+
+```bash
+# Generate and push schema to Neon
 cd apps/api
 npx drizzle-kit push
 ```
 
-Only run schema changes against a database you intend to modify.
-
-### 5. Start development
-
-From the repository root, use the scripts exposed by the current `package.json`:
+### 5. Start Development
 
 ```bash
-npm run dev:api
-npm run dev:web
+# From the root directory
+npm run dev:api   # Starts Cloudflare Worker on port 8787
+npm run dev:web   # Starts Next.js on port 3000
 ```
 
-The API runs on port `8787` and the web application normally runs on port `3000` when using the documented scripts.
+## API Routes
 
-## Environment variables
-
-Secrets belong in local environment files or deployment secret stores, never in source control.
-
-The production API currently expects infrastructure configuration such as:
-
-```text
-DATABASE_URL
-JWT_SECRET
-CORS_ORIGIN
-```
-
-Storage configuration may also be required by the current Worker/R2 implementation.
-
-For Cloudflare deployments, use Wrangler secrets rather than hard-coding credentials:
-
-```bash
-wrangler secret put DATABASE_URL
-wrangler secret put JWT_SECRET
-wrangler secret put CORS_ORIGIN
-```
-
-Never paste real secrets into Issues, Discussions, pull requests, logs, screenshots, or documentation.
-
-## API
-
-The API is organized around authentication, discovery, search, watch state, administration, and storage.
-
-### Authentication
-
-```text
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/refresh
-POST /api/auth/logout
-GET  /api/auth/me
-```
+### Auth
+- `POST /api/auth/register` - Create account
+- `POST /api/auth/login` - Sign in
+- `POST /api/auth/refresh` - Refresh token
+- `POST /api/auth/logout` - Sign out
+- `GET /api/auth/me` - Get current user
 
 ### Movies
-
-```text
-GET /api/movies
-GET /api/movies/featured
-GET /api/movies/trending
-GET /api/movies/:slug
-```
+- `GET /api/movies` - List movies (pagination, filtering)
+- `GET /api/movies/featured` - Featured movies
+- `GET /api/movies/trending` - Trending movies
+- `GET /api/movies/:slug` - Get movie by slug
 
 ### Search
+- `GET /api/search?q=query` - Search movies
+- `GET /api/search/suggestions?q=query` - Autocomplete
 
-```text
-GET /api/search?q=query
-GET /api/search/suggestions?q=query
-```
+### Watch (Protected)
+- `GET /api/watch/progress` - Get watch progress
+- `POST /api/watch/progress` - Update progress
+- `GET /api/watch/history` - Watch history
+- `GET /api/watch/streaming-url/:movieId` - Get streaming URL
+- `GET /api/watch/watchlist` - Get watchlist
+- `POST /api/watch/watchlist` - Add to watchlist
+- `DELETE /api/watch/watchlist/:movieId` - Remove from watchlist
 
-### Watch — protected
+### Discovery (Public)
+- `GET /api/discovery/search?q=query` - Search TMDB
+- `GET /api/discovery/suggestions?q=query` - Autocomplete from TMDB
+- `GET /api/discovery/trending` - Trending (day/week)
+- `GET /api/discovery/popular?media_type=movie` - Popular movies/TV
+- `GET /api/discovery/movie/:tmdbId` - TMDB movie details
+- `GET /api/discovery/tv/:tmdbId` - TMDB TV details
+- `GET /api/discovery/movie/:tmdbId/recommendations` - Recommendations
+- `GET /api/discovery/tv/:tmdbId/recommendations` - TV recommendations
+- `GET /api/discovery/genres` - Merged genre list
 
-```text
-GET    /api/watch/progress
-POST   /api/watch/progress
-GET    /api/watch/history
-GET    /api/watch/streaming-url/:movieId
-GET    /api/watch/watchlist
-POST   /api/watch/watchlist
-DELETE /api/watch/watchlist/:movieId
-```
+### Admin (Protected, Admin Only)
+- `GET /api/admin/dashboard` - Dashboard stats
+- `GET /api/admin/movies` - List all movies
+- `POST /api/admin/movies` - Create movie
+- `PUT /api/admin/movies/:id` - Update movie
+- `DELETE /api/admin/movies/:id` - Delete movie
+- `POST /api/admin/movies/:id/episodes` - Add episode
+- `GET /api/admin/audit` - Audit logs
+- `GET /api/admin/users` - List users
+- `POST /api/admin/tmdb/search` - Search TMDB for import
+- `POST /api/admin/tmdb/import` - Import TMDB metadata into Veyra
+- `POST /api/admin/tmdb/refresh/:movieId` - Refresh metadata from TMDB
+- `GET /api/admin/tmdb/check/:tmdbId` - Check if already imported
 
-### Admin — protected/admin only
-
-```text
-GET    /api/admin/dashboard
-GET    /api/admin/movies
-POST   /api/admin/movies
-PUT    /api/admin/movies/:id
-DELETE /api/admin/movies/:id
-POST   /api/admin/movies/:id/episodes
-GET    /api/admin/audit
-GET    /api/admin/users
-```
-
-### Storage — protected/admin only
-
-```text
-POST   /api/storage/upload/movie
-POST   /api/storage/upload/episode
-POST   /api/storage/upload/image
-GET    /api/storage/download/:key
-DELETE /api/storage/:key
-GET    /api/storage/list
-GET    /api/storage/quota
-```
-
-Authentication and authorization must be enforced by the API. Never rely on the frontend alone to protect admin or storage operations.
+### Storage (Protected, Admin Only)
+- `POST /api/storage/upload/movie` - Upload movie file to R2
+- `POST /api/storage/upload/episode` - Upload episode file to R2
+- `POST /api/storage/upload/image` - Upload poster/backdrop/thumbnail
+- `GET /api/storage/download/:key` - Get download URL
+- `DELETE /api/storage/:key` - Delete file from R2
+- `GET /api/storage/list` - List files in R2
+- `GET /api/storage/quota` - Get storage usage
 
 ## Deployment
 
-### Frontend — Vercel
-
-The Next.js application can be deployed from `apps/web` using Vercel or the repository's configured deployment integration.
+### Frontend (Vercel)
 
 ```bash
 cd apps/web
 vercel deploy
 ```
 
-### API — Cloudflare Workers
-
-Set production secrets through Wrangler:
+### Backend (Cloudflare Workers)
 
 ```bash
 cd apps/api
+
+# Set secrets
 wrangler secret put DATABASE_URL
 wrangler secret put JWT_SECRET
 wrangler secret put CORS_ORIGIN
+wrangler secret put TMDB_API_READ_ACCESS_TOKEN
+
+# Deploy
 wrangler deploy
 ```
 
-Configure R2 bindings and any additional Worker variables according to the current `wrangler` configuration.
+## TMDB Integration
 
-## Design system
+### Overview
 
-Veyra uses a cinematic dark interface with a glass-inspired visual language.
+Veyra integrates with The Movie Database (TMDB) for metadata and discovery. TMDB is **not** a streaming source — it provides movie/TV metadata, posters, backdrops, cast info, and discovery data. All actual video content remains in Veyra's own storage (Cloudflare R2).
 
-- **Primary:** Veyra Violet `#d0bcff`
-- **Background:** Near-black `#0A0A0B`
-- **Surface:** Elevated dark `#141416`
+### Architecture
+
+```
+TMDB API (v3)
+  ↓
+Cloudflare Worker (server-side only)
+  ↓
+Admin imports movie metadata
+  ↓
+Neon PostgreSQL (source of truth)
+  ↓
+Veyra API serves catalog to frontend
+  ↓
+Next.js PWA
+```
+
+### Required Environment Variable
+
+| Variable | Where | Description |
+|---|---|---|
+| `TMDB_API_READ_ACCESS_TOKEN` | Cloudflare Workers only | TMDB API v3 Read Access Token |
+
+### Setup
+
+1. **Get a TMDB API key** at [themoviedb.org](https://www.themoviedb.org/settings/api)
+   - Create an account → Settings → API → Request an API key
+   - Choose "Developer" → fill in app info
+   - Copy the **API Read Access Token** (Bearer token)
+
+2. **For local development** — add to `apps/api/.dev.vars`:
+   ```
+   TMDB_API_READ_ACCESS_TOKEN=your_token_here
+   ```
+
+3. **For production** — set as a Cloudflare Workers secret:
+   ```bash
+   wrangler secret put TMDB_API_READ_ACCESS_TOKEN
+   # Paste your token when prompted
+   ```
+
+### Security
+
+- The TMDB token is **server-side only** — never exposed to the browser
+- The frontend communicates with Veyra's API, not directly with TMDB
+- Admin import routes require admin authentication
+- TMDB IDs are validated on import
+- Duplicate imports are prevented by TMDB ID + media type uniqueness
+
+### Admin Import Workflow
+
+1. Admin navigates to **Admin → Movie Management → TMDB Import**
+2. Searches for a movie or TV show by title
+3. Previews TMDB results (title, poster, overview, rating, year)
+4. Clicks "Import to Veyra"
+5. System fetches full TMDB details (genres, cast, countries, etc.)
+6. Creates a Veyra catalog entry linked to the TMDB ID
+7. Admin can later refresh metadata from TMDB or attach streaming files
+
+### Discovery Sections (Frontend)
+
+The homepage shows TMDB-powered sections:
+- **Trending Today** — TMDB trending across all media
+- **Popular Movies** — TMDB popular movies
+- **Popular TV Shows** — TMDB popular TV
+
+These sections degrade gracefully if TMDB is unavailable.
+
+### Database Schema Changes
+
+The `movies` table includes these TMDB-specific fields:
+- `tmdb_id` — TMDB external ID
+- `tmdb_media_type` — "movie" or "tv"
+- `original_title` — Original language title
+- `original_language` — ISO 639-1 code
+- `overview` — Full TMDB plot synopsis
+- `release_date` — Release/air date string
+- `vote_average` — TMDB user rating
+- `vote_count` — Number of TMDB votes
+- `popularity` — TMDB popularity score
+- `poster_path` — TMDB poster path
+- `backdrop_path` — TMDB backdrop path
+- `genres` — JSON array of genre names
+- `production_countries` — JSON array
+- `spoken_languages` — JSON array
+- `status_tmdb` — TMDB status (Returning, Ended, Released, etc.)
+- `metadata_updated_at` — Last sync timestamp
+
+To apply schema changes to Neon:
+```bash
+cd apps/api
+npx drizzle-kit push
+```
+
+## Design System
+
+Veyra uses a **Cinematic Glassmorphism** design system with:
+
+- **Primary:** Veyra Violet (#d0bcff)
+- **Background:** Near-Black (#0A0A0B)
+- **Surface:** Elevated Dark (#141416)
 - **Typography:** Plus Jakarta Sans
-- **Visual language:** Glass panels, controlled violet glow, smooth transitions
+- **Effects:** Glass panels, violet glow, smooth animations
 
-The detailed design specification is maintained under `templates/`.
-
-When changing the UI, preserve responsive behavior, accessibility, reduced-motion preferences, and performance.
-
-## Security
-
-Security issues should **not** be reported through public Issues or Discussions.
-
-See [`SECURITY.md`](./SECURITY.md) for the reporting process.
-
-In particular, never commit:
-
-- API keys
-- Database credentials
-- JWT secrets
-- Cloudflare credentials
-- R2 credentials
-- `.env` or `.dev.vars` files containing secrets
-- Personal access tokens
-
-If a secret is accidentally committed, rotate/revoke it immediately. Removing it from the latest commit does not remove it from Git history.
-
-## Contributing
-
-Contributions are welcome.
-
-Before starting work:
-
-1. Check existing Issues and Discussions.
-2. For bugs, use the bug report template.
-3. For feature proposals, use the feature request template or start a Discussion if the idea needs community feedback.
-4. Keep changes focused.
-5. Run the available build/tests before opening a PR.
-6. Never commit secrets.
-
-Read [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the contributor workflow.
-
-### Pull request expectations
-
-A good PR should explain:
-
-- What changed
-- Why it changed
-- How it was tested
-- Any UI screenshots for meaningful frontend changes
-- Any database migrations
-- Any new environment variables
-
-Avoid unrelated refactors in feature PRs.
-
-## Community
-
-GitHub Discussions are intended for community conversation, questions, ideas, development discussions, and project updates.
-
-Recommended categories:
-
-- Announcements
-- General
-- Ideas
-- Q&A
-- Development
-- Show and Tell
-
-Use Issues for actionable bugs and implementation-ready feature requests.
-
-## Funding
-
-Veyra is supported through GitHub Sponsors.
-
-If Veyra is useful to you, consider supporting continued development, infrastructure, security work, and new features:
-
-**[Sponsor Veyra](https://github.com/sponsors/oliver4441)**
-
-## Project status
-
-Veyra is under active development. APIs, infrastructure, database schema, and UI behavior may change as the project evolves.
-
-Before deploying to production, review the current source, environment configuration, database migrations, authentication implementation, storage authorization, and deployment configuration.
+See `templates/DESIGN.md` for the complete design specification.
 
 ## License
 
-The current repository is marked **Private / All Rights Reserved** in the project documentation. Do not assume that the code is open-source merely because the repository becomes publicly visible.
-
-If the project is later released under an open-source license, replace this section with the exact license and copyright terms.
+Private - All rights reserved.

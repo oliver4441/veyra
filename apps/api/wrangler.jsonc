@@ -30,12 +30,6 @@
           "bucket_name": "veyra-media-staging",
           "preview_bucket_name": "veyra-media-staging-preview"
         }
-      ],
-      "routes": [
-        {
-          "pattern": "api-staging.veyra.app/*",
-          "custom_domain": true
-        }
       ]
     },
     "production": {
@@ -46,12 +40,6 @@
         {
           "binding": "R2_BUCKET",
           "bucket_name": "veyra-media"
-        }
-      ],
-      "routes": [
-        {
-          "pattern": "api.veyra.app/*",
-          "custom_domain": true
         }
       ]
     }

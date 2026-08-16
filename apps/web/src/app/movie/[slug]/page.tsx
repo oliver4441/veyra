@@ -92,11 +92,14 @@ export default function MovieDetailPage() {
 
             {/* Meta info */}
             <div className="flex flex-wrap items-center gap-4 mb-6">
-              {movie.imdbRating && (
+              {(movie.voteAverage || movie.imdbRating) && (
                 <div className="flex items-center gap-1 text-primary">
                   <Star size={18} fill="currentColor" />
-                  <span className="font-bold">{movie.imdbRating}</span>
+                  <span className="font-bold">{movie.voteAverage || movie.imdbRating}</span>
                   <span className="text-on-surface-variant text-sm">/10</span>
+                  {movie.voteCount ? (
+                    <span className="text-on-surface-variant text-xs">({movie.voteCount.toLocaleString()} votes)</span>
+                  ) : null}
                 </div>
               )}
               {movie.year && (
@@ -116,6 +119,11 @@ export default function MovieDetailPage() {
               )}
               {movie.type === 'series' && (
                 <span className="chip">Series</span>
+              )}
+              {movie.originalLanguage && (
+                <span className="text-on-surface-variant text-sm">
+                  {movie.originalLanguage.toUpperCase()}
+                </span>
               )}
             </div>
 
@@ -199,6 +207,71 @@ export default function MovieDetailPage() {
                     {tag}
                   </span>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* TMDB Metadata */}
+          {(movie.productionCountries && movie.productionCountries.length > 0) ||
+           (movie.spokenLanguages && movie.spokenLanguages.length > 0) ? (
+            <div className="mb-8">
+              <h2 className="font-headline-md text-xl text-white mb-4">Production</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {movie.productionCountries && movie.productionCountries.length > 0 && (
+                  <div>
+                    <span className="font-label-caps text-xs text-on-surface-variant block mb-1">
+                      Countries
+                    </span>
+                    <span className="text-white">{movie.productionCountries.join(', ')}</span>
+                  </div>
+                )}
+                {movie.spokenLanguages && movie.spokenLanguages.length > 0 && (
+                  <div>
+                    <span className="font-label-caps text-xs text-on-surface-variant block mb-1">
+                      Languages
+                    </span>
+                    <span className="text-white">{movie.spokenLanguages.join(', ')}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
+
+          {/* Trailer */}
+          {movie.trailerUrl && (
+            <div className="mb-8">
+              <h2 className="font-headline-md text-xl text-white mb-4">Trailer</h2>
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden">
+                <iframe
+                  src={`https://www.youtube.com/embed/${movie.trailerUrl.includes('v=') ? movie.trailerUrl.split('v=')[1]?.split('&')[0] : movie.trailerUrl}`}
+                  title="Trailer"
+                  className="absolute inset-0 w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+          )}
+
+          {/* TMDB Metadata Badge */}
+          {movie.tmdbId && (
+            <div className="mb-8 p-4 bg-surface-container rounded-xl border border-white/5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-on-surface-variant text-xs mb-1">TMDB Metadata</p>
+                  <p className="text-white text-sm">
+                    ID: {movie.tmdbId} · {movie.tmdbMediaType === 'tv' ? 'TV Show' : 'Movie'}
+                    {movie.releaseDate ? ` · Released ${movie.releaseDate}` : ''}
+                  </p>
+                </div>
+                <a
+                  href={`https://www.themoviedb.org/${movie.tmdbMediaType || 'movie'}/${movie.tmdbId}`}
+                  target=""
+                  rel="noopener noreferrer"
+                  className="text-primary text-sm hover:underline"
+                >
+                  View on TMDB →
+                </a>
               </div>
             </div>
           )}

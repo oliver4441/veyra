@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import MovieRow from '@/components/MovieRow';
-import { api, type Movie } from '@/lib/api';
+import DiscoveryRow from '@/components/DiscoveryRow';
+import { api, type Movie, type DiscoveryItem } from '@/lib/api';
 
 // Mock data for demo (will be replaced with API calls)
 const mockFeatured: Movie = {
@@ -112,6 +113,11 @@ export default function HomePage() {
   const [actionMovies, setActionMovies] = useState<Movie[]>(mockMovies);
   const [loading, setLoading] = useState(true);
 
+  // TMDB Discovery state
+  const [tmdbTrending, setTmdbTrending] = useState<DiscoveryItem[]>([]);
+  const [tmdbPopularMovies, setTmdbPopularMovies] = useState<DiscoveryItem[]>([]);
+  const [tmdbPopularTV, setTmdbPopularTV] = useState<DiscoveryItem[]>([]);
+
   useEffect(() => {
     // Try to fetch from API, fall back to mock data
     const fetchData = async () => {
@@ -133,12 +139,35 @@ export default function HomePage() {
         }
       } catch {
         // Use mock data
-      } finally {
-        setLoading(false);
+      }
+    };
+
+    // Fetch TMDB discovery data (non-blocking, fallback to empty)
+    const fetchDiscovery = async () => {
+      try {
+        const [trendingRes, popularMoviesRes, popularTVRes] = await Promise.allSettled([
+          api.getTrending('day'),
+          api.getPopular('movie'),
+          api.getPopular('tv'),
+        ]);
+
+        if (trendingRes.status === 'fulfilled') {
+          setTmdbTrending(trendingRes.value.results);
+        }
+        if (popularMoviesRes.status === 'fulfilled') {
+          setTmdbPopularMovies(popularMoviesRes.value.results);
+        }
+        if (popularTVRes.status === 'fulfilled') {
+          setTmdbPopularTV(popularTVRes.value.results);
+        }
+      } catch {
+        // TMDB unavailable — discovery sections just won't show
       }
     };
 
     fetchData();
+    fetchDiscovery();
+    setLoading(false);
   }, []);
 
   return (
@@ -150,6 +179,13 @@ export default function HomePage() {
 
       {/* Content Rows */}
       <main className="relative z-20 -mt-20 pb-32">
+        {/* TMDB Trending Today */}
+        {tmdbTrending.length > 0 && (
+          <div className="pl-5 md:pl-16">
+            <DiscoveryRow title="Trending Today" items={tmdbTrending} size="md" />
+          </div>
+        )}
+
         {/* Continue Watching */}
         <section className="pl-5 md:pl-16 mb-section-gap">
           <h2 className="font-headline-md text-headline-md text-white mb-6 pr-4 md:pr-16">
@@ -205,6 +241,20 @@ export default function HomePage() {
         <div className="pl-5 md:pl-16">
           <MovieRow title="Action & Adventure" movies={actionMovies} size="md" />
         </div>
+
+        {/* TMDB Popular Movies */}
+        {tmdbPopularMovies.length > 0 && (
+          <div className="pl-5 md:pl-16">
+            <DiscoveryRow title="Popular Movies" items={tmdbPopularMovies} size="md" />
+          </div>
+        )}
+
+        {/* TMDB Popular TV */}
+        {tmdbPopularTV.length > 0 && (
+          <div className="pl-5 md:pl-16">
+            <DiscoveryRow title="Popular TV Shows" items={tmdbPopularTV} size="md" />
+          </div>
+        )}
       </main>
     </div>
   );
