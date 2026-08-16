@@ -1,0 +1,7 @@
+name = "veyra-web"
+compatibility_date = "2025-08-11"
+pages_build_output_dir = ".vercel/output/static"
+
+# Cloudflare Pages CI will build from GitHub
+# Build command: cd ../.. && npm install && npm run build:web
+# Build output directory: apps/web/.vercel/output/static
