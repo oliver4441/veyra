@@ -380,6 +380,28 @@ class ApiClient {
     );
   }
 
+  // ── Offline Queue ──────────────────────────────────────────────
+
+  async flushOfflineQueue() {
+    try {
+      const { getQueuedRequests, removeQueuedRequest } = await import('@/lib/offline-store');
+      const queued = await getQueuedRequests();
+      for (const req of queued) {
+        try {
+          await this.realRequest(req.endpoint, {
+            method: req.method,
+            body: req.body,
+          });
+          await removeQueuedRequest(req.id);
+        } catch {
+          // Keep in queue if still failing
+        }
+      }
+    } catch {
+      // offline-store unavailable
+    }
+  }
+
   // ── TMDB Discovery ──────────────────────────────────────────────
 
   async discoverySearch(query: string, params?: {
