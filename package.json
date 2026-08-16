@@ -15,6 +15,7 @@
     "db:generate": "npm run db:generate --workspace=packages/db",
     "db:push": "npm run db:push --workspace=packages/db",
     "db:studio": "npm run db:studio --workspace=packages/db",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "vercel-build": "cd apps/web && npm run build"
   }
 }
