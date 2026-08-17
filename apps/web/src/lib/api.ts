@@ -105,6 +105,8 @@ interface User {
   displayName?: string;
   avatarUrl?: string;
   role: string;
+  emailVerified?: boolean;
+  createdAt?: string;
 }
 
 interface Pagination {
@@ -124,6 +126,24 @@ interface WatchProgress {
   updatedAt: string;
 }
 
+// Optional async source of the auth token (the Firebase ID token). Registered
+// by the client auth layer so every request resolves a fresh token.
+let tokenProvider: (() => Promise<string | null>) | null = null;
+
+export function setTokenProvider(fn: (() => Promise<string | null>) | null) {
+  tokenProvider = fn;
+}
+
+export function clearLegacySession() {
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.removeItem('veyra-access-token');
+    } catch {
+      // ignore
+    }
+  }
+}
+
 class ApiClient {
   private baseUrl: string;
   private accessToken: string | null = null;
@@ -131,7 +151,7 @@ class ApiClient {
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
-    // Restore persisted session token so refresh keeps you signed in
+    // Restore any persisted token (legacy sessions / mock mode)
     if (typeof window !== 'undefined') {
       try {
         this.accessToken = window.localStorage.getItem('veyra-access-token');
@@ -201,8 +221,11 @@ class ApiClient {
       headers['Content-Type'] = 'application/json';
     }
 
-    if (this.accessToken) {
-      headers['Authorization'] = `Bearer ${this.accessToken}`;
+    // Resolve the bearer token: explicit token (mock/legacy) or the
+    // Firebase ID token provider registered by the auth layer.
+    const token = this.accessToken || (tokenProvider ? await tokenProvider() : null);
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     const response = await fetch(url, {
@@ -218,47 +241,14 @@ class ApiClient {
     return response.json();
   }
 
-  // Auth
-  async register(data: {
-    email: string;
-    username: string;
-    password: string;
-    displayName?: string;
-  }) {
-    const result = await this.request<{
-      user: User;
-      accessToken: string;
-      refreshToken: string;
-    }>('/api/auth/register', {
+  // ── Auth (Firebase) ──────────────────────────────────────────────────
+  // Sign-in/sign-up happen in the Firebase SDK; this endpoint exchanges the
+  // resulting ID token for the Veyra user (creating/linking the account).
+  async exchangeFirebaseToken(idToken: string) {
+    return this.request<{ user: User; isNewUser: boolean }>('/api/auth/firebase', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ idToken }),
     });
-    this.accessToken = result.accessToken;
-    return result;
-  }
-
-  async logout() {
-    try {
-      await this.request<{ success: boolean }>('/api/auth/logout', {
-        method: 'POST',
-      });
-    } catch {
-      // ignore
-    }
-    this.setAccessToken(null);
-  }
-
-  async login(email: string, password: string) {
-    const result = await this.request<{
-      user: User;
-      accessToken: string;
-      refreshToken: string;
-    }>('/api/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-    this.accessToken = result.accessToken;
-    return result;
   }
 
   async getMe() {
@@ -378,6 +368,68 @@ class ApiClient {
       `/api/watch/watchlist/${movieId}`,
       { method: 'DELETE' }
     );
+  }
+
+  // ── Ratings & Reviews ──────────────────────────────────────────
+
+  async getMovieRatings(movieId: number) {
+    return this.request<{
+      ratings: Array<{
+        id: number;
+        rating: number;
+        review?: string;
+        createdAt: string;
+        updatedAt: string;
+        userId: number;
+        username: string;
+        displayName?: string;
+        avatarUrl?: string;
+      }>;
+      stats: { average: number; total: number };
+      userRating: { id: number; rating: number; review?: string } | null;
+    }>(`/api/ratings/movie/${movieId}`);
+  }
+
+  async submitRating(data: { movieId: number; rating: number; review?: string }) {
+    return this.request<{ success: boolean; updated: boolean }>('/api/ratings', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async deleteRating(movieId: number) {
+    return this.request<{ success: boolean }>(
+      `/api/ratings/${movieId}`,
+      { method: 'DELETE' }
+    );
+  }
+
+  async getUserRatings(limit = 50) {
+    return this.request<{
+      ratings: Array<{
+        id: number;
+        rating: number;
+        review?: string;
+        createdAt: string;
+        movie: {
+          id: number;
+          title: string;
+          slug: string;
+          posterUrl?: string;
+          year?: number;
+          type: string;
+        };
+      }>;
+    }>(`/api/ratings/user?limit=${limit}`);
+  }
+
+  // ── Profile ─────────────────────────────────────────────────────
+
+  async updateProfile(data: { displayName?: string; avatarUrl?: string }) {
+    return this.request<{ user: User }>('/api/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
   }
 
   // ── Offline Queue ──────────────────────────────────────────────

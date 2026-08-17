@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import PWAProvider from '@/components/PWAProvider';
+import Footer from '@/components/Footer';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -108,6 +109,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-background text-on-surface font-body-md text-body-md antialiased">
         <PWAProvider>
           {children}
+          <Footer />
         </PWAProvider>
       </body>
     </html>

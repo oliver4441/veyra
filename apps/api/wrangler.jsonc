@@ -5,7 +5,9 @@
   "compatibility_date": "2025-08-11",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
-    "ENVIRONMENT": "development"
+    "ENVIRONMENT": "development",
+    "FIREBASE_PROJECT_ID": "omix-systems-cd1af",
+    "ADMIN_EMAILS": ""
   },
   // R2 Bucket Binding
   "r2_buckets": [

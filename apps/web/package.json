@@ -8,17 +8,17 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-
     "generate-icons": "node scripts/generate-icons.js",
     "create-icons": "node scripts/create-placeholder-icons.js"
   },
   "dependencies": {
+    "clsx": "^2.1.0",
+    "firebase": "^12.17.1",
+    "hls.js": "^1.5.0",
+    "lucide-react": "^0.460.0",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "hls.js": "^1.5.0",
-    "lucide-react": "^0.460.0",
-    "clsx": "^2.1.0",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {

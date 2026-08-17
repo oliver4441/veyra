@@ -5,9 +5,9 @@ import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import MovieRow from '@/components/MovieRow';
 import DiscoveryRow from '@/components/DiscoveryRow';
+import { SkeletonRow } from '@/components/SkeletonCard';
 import { api, type Movie, type DiscoveryItem } from '@/lib/api';
 
-// Mock data for demo (will be replaced with API calls)
 const mockFeatured: Movie = {
   id: 1,
   title: 'The Midnight Echo',
@@ -16,7 +16,7 @@ const mockFeatured: Movie = {
   shortDescription: 'When a mysterious signal disrupts global communications, a rogue cryptographer must decode the truth before the silence becomes permanent.',
   type: 'movie',
   year: 2024,
-  duration: 8100, // 2h 15m
+  duration: 8100,
   rating: 'PG-13',
   imdbRating: 8.5,
   posterUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBMS5FpDB_NWOdcXFGMSssfzF8uhI6i8xJLMkZCU6UTuuRONadJatwkeFkU4EKacHfPmha_EoWKWGD-6AZ11eWW3VkaGiWm2QzJO7h9lSiCL0ZH7wmDiypFB6e4VvgmCfuRsKwRHXO6aqDD6wwHPIuv1rrs70qM04xkIZYQh4pPRQk9IBgEaOUO7kpaUPTmoIi4D-xd2IPwsRicE01AlOVSptaMh0B4q0cznQCYX6Q-LUpAssJCHDDYSQ',
@@ -28,98 +28,28 @@ const mockFeatured: Movie = {
   updatedAt: new Date().toISOString(),
 };
 
-const mockMovies: Movie[] = [
-  {
-    id: 2,
-    title: 'Shadow Protocol',
-    slug: 'shadow-protocol',
-    type: 'movie',
-    year: 2024,
-    duration: 7200,
-    rating: 'R',
-    posterUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-t2h6GTspWwWui1hdiqysrFUt3nKQjRQ9W8mRyxQh_AU50S9lxnHwqpN9mPCu-KdxQCyknGH2b8vIhhzF_dx-L267oKL_txzIzfoCtkduuBgl-vNiaI5RTl75rau_IdQkc4a8_E_-PIHFmSC2JRRTduq7ViFIkzVp-lvnmO0DyYKDLr9xk1oTHSUk5nf4cy_OsuHaDdSztoxahrfW14Q4m-uHJCsbUHl6fMtIpitgVC3r4S_l1Jq1Ig',
-    backdropUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-t2h6GTspWwWui1hdiqysrFUt3nKQjRQ9W8mRyxQh_AU50S9lxnHwqpN9mPCu-KdxQCyknGH2b8vIhhzF_dx-L267oKL_txzIzfoCtkduuBgl-vNiaI5RTl75rau_IdQkc4a8_E_-PIHFmSC2JRRTduq7ViFIkzVp-lvnmO0DyYKDLr9xk1oTHSUk5nf4cy_OsuHaDdSztoxahrfW14Q4m-uHJCsbUHl6fMtIpitgVC3r4S_l1Jq1Ig',
-    genres: [{ id: 3, name: 'Action', slug: 'action' }],
-    status: 'published',
-    trending: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 3,
-    title: 'Neon Nights',
-    slug: 'neon-nights',
-    type: 'movie',
-    year: 2024,
-    duration: 5400,
-    posterUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDpCUordSgIkXcMqxc228JR6WE6HhdXiN-pjiCjwfr8Z504MsGD3YzpTuVGVgI4txsU0TW7BtwDNInNe1d88MUJqOH5csyfmCNJGTn5BjtPBVR5d2Kfb82L48iiwre5SmdEj8LM9rH8EO6llvrPI1i4JhdPvG0J6Si2LsE7UgQF4ew88Yyx6ahUO6v3Afu_26qx7PI3Npnh5jUmrvUrfYJqHOYjZ6CORikTzDeyXiGSSGD97NPSYMVKNg',
-    backdropUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDpCUordSgIkXcMqxc228JR6WE6HhdXiN-pjiCjwfr8Z504MsGD3YzpTuVGVgI4txsU0TW7BtwDNInNe1d88MUJqOH5csyfmCNJGTn5BjtPBVR5d2Kfb82L48iiwre5SmdEj8LM9rH8EO6llvrPI1i4JhdPvG0J6Si2LsE7UgQF4ew88Yyx6ahUO6v3Afu_26qx7PI3Npnh5jUmrvUrfYJqHOYjZ6CORikTzDeyXiGSSGD97NPSYMVKNg',
-    genres: [{ id: 4, name: 'Cyberpunk', slug: 'cyberpunk' }],
-    status: 'published',
-    trending: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 4,
-    title: 'Crimson Horizon',
-    slug: 'crimson-horizon',
-    type: 'movie',
-    year: 2023,
-    duration: 6300,
-    rating: 'PG-13',
-    posterUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400',
-    backdropUrl: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800',
-    genres: [{ id: 5, name: 'Drama', slug: 'drama' }],
-    status: 'published',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 5,
-    title: 'Quantum Drift',
-    slug: 'quantum-drift',
-    type: 'series',
-    year: 2024,
-    duration: 3600,
-    posterUrl: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=400',
-    backdropUrl: 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800',
-    genres: [{ id: 1, name: 'Sci-Fi', slug: 'sci-fi' }],
-    status: 'published',
-    trending: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 6,
-    title: 'The Last Signal',
-    slug: 'the-last-signal',
-    type: 'movie',
-    year: 2024,
-    duration: 7800,
-    posterUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400',
-    backdropUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800',
-    genres: [{ id: 2, name: 'Thriller', slug: 'thriller' }],
-    status: 'published',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
+interface ContinueWatchingItem {
+  movieId: number;
+  position: number;
+  duration: number;
+  completed: boolean;
+  updatedAt: string;
+  movie?: Movie;
+}
 
 export default function HomePage() {
   const [featured, setFeatured] = useState<Movie>(mockFeatured);
-  const [trending, setTrending] = useState<Movie[]>(mockMovies);
-  const [recentlyAdded, setRecentlyAdded] = useState<Movie[]>(mockMovies);
-  const [actionMovies, setActionMovies] = useState<Movie[]>(mockMovies);
+  const [trending, setTrending] = useState<Movie[]>([]);
+  const [recentlyAdded, setRecentlyAdded] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // TMDB Discovery state
   const [tmdbTrending, setTmdbTrending] = useState<DiscoveryItem[]>([]);
   const [tmdbPopularMovies, setTmdbPopularMovies] = useState<DiscoveryItem[]>([]);
   const [tmdbPopularTV, setTmdbPopularTV] = useState<DiscoveryItem[]>([]);
 
+  const [continueWatching, setContinueWatching] = useState<ContinueWatchingItem[]>([]);
+
   useEffect(() => {
-    // Try to fetch from API, fall back to mock data
     const fetchData = async () => {
       try {
         const [featuredRes, trendingRes, moviesRes] = await Promise.allSettled([
@@ -131,18 +61,13 @@ export default function HomePage() {
         if (featuredRes.status === 'fulfilled' && featuredRes.value.movies.length > 0) {
           setFeatured(featuredRes.value.movies[0]);
         }
-        if (trendingRes.status === 'fulfilled') {
-          setTrending(trendingRes.value.movies);
-        }
-        if (moviesRes.status === 'fulfilled') {
-          setRecentlyAdded(moviesRes.value.movies);
-        }
+        if (trendingRes.status === 'fulfilled') setTrending(trendingRes.value.movies);
+        if (moviesRes.status === 'fulfilled') setRecentlyAdded(moviesRes.value.movies);
       } catch {
         // Use mock data
       }
     };
 
-    // Fetch TMDB discovery data (non-blocking, fallback to empty)
     const fetchDiscovery = async () => {
       try {
         const [trendingRes, popularMoviesRes, popularTVRes] = await Promise.allSettled([
@@ -151,24 +76,78 @@ export default function HomePage() {
           api.getPopular('tv'),
         ]);
 
-        if (trendingRes.status === 'fulfilled') {
-          setTmdbTrending(trendingRes.value.results);
-        }
-        if (popularMoviesRes.status === 'fulfilled') {
-          setTmdbPopularMovies(popularMoviesRes.value.results);
-        }
-        if (popularTVRes.status === 'fulfilled') {
-          setTmdbPopularTV(popularTVRes.value.results);
+        if (trendingRes.status === 'fulfilled') setTmdbTrending(trendingRes.value.results);
+        if (popularMoviesRes.status === 'fulfilled') setTmdbPopularMovies(popularMoviesRes.value.results);
+        if (popularTVRes.status === 'fulfilled') setTmdbPopularTV(popularTVRes.value.results);
+      } catch {
+        // TMDB unavailable
+      }
+    };
+
+    const fetchContinueWatching = async () => {
+      try {
+        await api.getMe();
+        const { progress } = await api.getWatchProgress();
+        const incomplete = progress
+          .filter((p) => !p.completed && p.movieId)
+          .reduce<ContinueWatchingItem[]>((acc, p) => {
+            if (!acc.find((a) => a.movieId === p.movieId)) {
+              acc.push({
+                movieId: p.movieId!,
+                position: p.position,
+                duration: p.duration,
+                completed: p.completed,
+                updatedAt: p.updatedAt,
+              });
+            }
+            return acc;
+          }, [])
+          .slice(0, 6);
+
+        if (incomplete.length > 0) {
+          const movies = await Promise.allSettled(
+            incomplete.map(async (item) => {
+              const allMovies = await api.getMovies({ limit: 50 });
+              const movie = allMovies.movies.find((m) => m.id === item.movieId);
+              return { ...item, movie: movie || undefined };
+            })
+          );
+          setContinueWatching(
+            movies
+              .filter(
+                (m): m is PromiseFulfilledResult<
+                  Omit<ContinueWatchingItem, 'movie'> & { movie: Movie | undefined }
+                > => m.status === 'fulfilled'
+              )
+              .map((m) => m.value)
+          );
         }
       } catch {
-        // TMDB unavailable — discovery sections just won't show
+        // Not authenticated or API error
       }
     };
 
     fetchData();
     fetchDiscovery();
+    fetchContinueWatching();
     setLoading(false);
   }, []);
+
+  const formatRemaining = (position: number, duration: number) => {
+    const remaining = duration - position;
+    if (remaining <= 0) return 'Complete';
+    const hours = Math.floor(remaining / 3600);
+    const minutes = Math.floor((remaining % 3600) / 60);
+    if (hours > 0) return `${hours}h ${minutes}m left`;
+    return `${minutes}m left`;
+  };
+
+  const formatDuration = (seconds?: number) => {
+    if (!seconds) return '';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  };
 
   return (
     <div className="min-h-screen">
@@ -178,83 +157,125 @@ export default function HomePage() {
       <Hero movie={featured} />
 
       {/* Content Rows */}
-      <main className="relative z-20 -mt-20 pb-32">
-        {/* TMDB Trending Today */}
-        {tmdbTrending.length > 0 && (
-          <div className="pl-5 md:pl-16">
+      <main className="relative z-20 -mt-24 pb-32">
+        <div className="pl-5 md:pl-16 pr-4 md:pr-16">
+
+          {/* ── TMDB Trending Today ───────────────────────────── */}
+          {loading ? (
+            <section className="mb-12 md:mb-16">
+              <div className="h-6 w-48 bg-surface-container rounded animate-pulse mb-5" />
+              <SkeletonRow count={6} variant="backdrop" />
+            </section>
+          ) : tmdbTrending.length > 0 ? (
             <DiscoveryRow title="Trending Today" items={tmdbTrending} size="md" />
-          </div>
-        )}
+          ) : null}
 
-        {/* Continue Watching */}
-        <section className="pl-5 md:pl-16 mb-section-gap">
-          <h2 className="font-headline-md text-headline-md text-white mb-6 pr-4 md:pr-16">
-            Continue Watching
-          </h2>
-          <div className="flex gap-4 overflow-x-auto hide-scrollbar pb-4 snap-x">
-            {mockMovies.slice(0, 2).map((movie) => (
-              <div
-                key={movie.id}
-                className="card min-w-[280px] w-[280px] md:min-w-[320px] md:w-[320px] snap-start"
-              >
-                <div className="relative h-40 bg-surface-container">
-                  {movie.backdropUrl ? (
-                    <img
-                      src={movie.backdropUrl}
-                      alt={movie.title}
-                      className="w-full h-full object-cover opacity-80"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-surface-container" />
-                  )}
-                </div>
-                <div className="p-4">
-                  <h3 className="font-body-lg text-body-lg text-white font-semibold mb-2">
-                    {movie.title}
-                  </h3>
-                  <div className="w-full bg-surface-variant rounded-full h-1.5 mb-2 overflow-hidden">
-                    <div
-                      className="bg-primary h-1.5 rounded-full"
-                      style={{ width: `${Math.random() * 80 + 20}%` }}
-                    />
-                  </div>
-                  <span className="text-on-surface-variant font-label-caps text-xs">
-                    {Math.floor(Math.random() * 60 + 10)}m remaining
-                  </span>
-                </div>
+          {/* ── Continue Watching ─────────────────────────────── */}
+          {continueWatching.length > 0 && (
+            <section className="mb-12 md:mb-16">
+              <h2 className="font-headline-md text-lg md:text-xl text-white font-semibold mb-5">
+                Continue Watching
+              </h2>
+              <div className="flex gap-3 md:gap-4 overflow-x-auto hide-scrollbar pb-2 snap-x snap-mandatory">
+                {continueWatching.map((item) => {
+                  const progressPct =
+                    item.duration > 0
+                      ? Math.min((item.position / item.duration) * 100, 100)
+                      : 0;
+                  return (
+                    <a
+                      key={item.movieId}
+                      href={`/movie/${item.movie?.slug || item.movieId}`}
+                      className="group min-w-[280px] w-[280px] md:min-w-[320px] md:w-[320px] snap-start flex-shrink-0"
+                    >
+                      <div className="relative h-44 rounded-xl overflow-hidden bg-surface-container">
+                        {item.movie?.backdropUrl ? (
+                          <img
+                            src={item.movie.backdropUrl}
+                            alt={item.movie.title}
+                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-primary/20 to-surface-container" />
+                        )}
+
+                        {/* Play overlay */}
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-300">
+                            <span className="text-white text-lg ml-0.5">▶</span>
+                          </div>
+                        </div>
+
+                        {/* Progress bar at bottom */}
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                          <div
+                            className="h-full bg-primary transition-all duration-300"
+                            style={{ width: `${progressPct}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="px-1 pt-3">
+                        <h3 className="text-white font-semibold text-sm truncate group-hover:text-primary transition-colors">
+                          {item.movie?.title || 'Unknown'}
+                        </h3>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-on-surface-variant text-xs">
+                            {formatDuration(item.movie?.duration)}
+                          </span>
+                          <span className="text-on-surface-variant text-xs">
+                            {formatRemaining(item.position, item.duration)}
+                          </span>
+                        </div>
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
+          )}
 
-        {/* Trending Now */}
-        <div className="pl-5 md:pl-16">
-          <MovieRow title="Trending Now" movies={trending} size="md" />
-        </div>
+          {/* ── Trending Now ─────────────────────────────────── */}
+          {loading ? (
+            <section className="mb-12 md:mb-16">
+              <div className="h-6 w-40 bg-surface-container rounded animate-pulse mb-5" />
+              <SkeletonRow count={6} />
+            </section>
+          ) : trending.length > 0 ? (
+            <MovieRow title="Trending Now" movies={trending} size="md" />
+          ) : null}
 
-        {/* Recently Added */}
-        <div className="pl-5 md:pl-16">
-          <MovieRow title="Recently Added" movies={recentlyAdded} size="md" />
-        </div>
+          {/* ── Recently Added ───────────────────────────────── */}
+          {loading ? (
+            <section className="mb-12 md:mb-16">
+              <div className="h-6 w-48 bg-surface-container rounded animate-pulse mb-5" />
+              <SkeletonRow count={6} />
+            </section>
+          ) : recentlyAdded.length > 0 ? (
+            <MovieRow title="Recently Added" movies={recentlyAdded} size="md" />
+          ) : null}
 
-        {/* Action */}
-        <div className="pl-5 md:pl-16">
-          <MovieRow title="Action & Adventure" movies={actionMovies} size="md" />
-        </div>
-
-        {/* TMDB Popular Movies */}
-        {tmdbPopularMovies.length > 0 && (
-          <div className="pl-5 md:pl-16">
+          {/* ── TMDB Popular Movies ──────────────────────────── */}
+          {loading ? (
+            <section className="mb-12 md:mb-16">
+              <div className="h-6 w-44 bg-surface-container rounded animate-pulse mb-5" />
+              <SkeletonRow count={6} variant="backdrop" />
+            </section>
+          ) : tmdbPopularMovies.length > 0 ? (
             <DiscoveryRow title="Popular Movies" items={tmdbPopularMovies} size="md" />
-          </div>
-        )}
+          ) : null}
 
-        {/* TMDB Popular TV */}
-        {tmdbPopularTV.length > 0 && (
-          <div className="pl-5 md:pl-16">
+          {/* ── TMDB Popular TV ──────────────────────────────── */}
+          {loading ? (
+            <section className="mb-12 md:mb-16">
+              <div className="h-6 w-48 bg-surface-container rounded animate-pulse mb-5" />
+              <SkeletonRow count={6} variant="backdrop" />
+            </section>
+          ) : tmdbPopularTV.length > 0 ? (
             <DiscoveryRow title="Popular TV Shows" items={tmdbPopularTV} size="md" />
-          </div>
-        )}
+          ) : null}
+
+        </div>
       </main>
     </div>
   );

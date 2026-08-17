@@ -9,24 +9,23 @@ import {
   episodes,
   mediaFiles,
 } from '../db/schema';
-import type { Env } from '../index';
+import type { AppContext } from '../index';
 
-const watch = new Hono<{ Bindings: Env }>();
+const watch = new Hono<AppContext>();
 
-// Middleware to extract user from JWT
+// Middleware to extract user (userId is resolved from Firebase in index.ts)
 watch.use('*', async (c, next) => {
-  const payload = (c as any).get('jwtPayload');
-  if (!payload) {
+  const userId = c.get('userId');
+  if (!userId) {
     return c.json({ error: 'Authentication required' }, 401);
   }
-  c.set('userId', payload.userId);
   await next();
 });
 
 // GET /api/watch/progress - Get watch progress for all movies
 watch.get('/progress', async (c) => {
   const db = getDb(c.env.DATABASE_URL);
-  const userId = (c as any).get('userId') as number;
+  const userId = c.get('userId');
 
   const progress = await db
     .select()
@@ -40,7 +39,7 @@ watch.get('/progress', async (c) => {
 // GET /api/watch/progress/:movieId - Get progress for specific movie
 watch.get('/progress/:movieId', async (c) => {
   const db = getDb(c.env.DATABASE_URL);
-  const userId = (c as any).get('userId') as number;
+  const userId = c.get('userId');
   const movieId = parseInt(c.req.param('movieId'));
 
   const [progress] = await db
@@ -60,7 +59,7 @@ watch.get('/progress/:movieId', async (c) => {
 // POST /api/watch/progress - Update watch progress
 watch.post('/progress', async (c) => {
   const db = getDb(c.env.DATABASE_URL);
-  const userId = (c as any).get('userId') as number;
+  const userId = c.get('userId');
   const body = await c.req.json();
   const { movieId, episodeId, position, duration } = body;
 
@@ -128,7 +127,7 @@ watch.post('/progress', async (c) => {
 // GET /api/watch/history - Get watch history
 watch.get('/history', async (c) => {
   const db = getDb(c.env.DATABASE_URL);
-  const userId = (c as any).get('userId') as number;
+  const userId = c.get('userId');
   const limit = parseInt(c.req.query('limit') || '20');
 
   const history = await db
@@ -175,14 +174,14 @@ watch.get('/streaming-url/:movieId', async (c) => {
     )
     .limit(1);
 
-  if (!mediaFile || !mediaFile.r2Key) {
+  if (!mediaFile || !mediaFile.objectPath) {
     return c.json({ error: 'Media file not found for requested quality' }, 404);
   }
 
   // Get the public URL from R2
-  const streamingUrl = mediaFile.publicUrl || 
-    (c.env.R2_PUBLIC_DOMAIN 
-      ? `https://${c.env.R2_PUBLIC_DOMAIN}/${mediaFile.r2Key}`
+  const streamingUrl = mediaFile.publicUrl ||
+    (c.env.R2_PUBLIC_DOMAIN
+      ? `https://${c.env.R2_PUBLIC_DOMAIN}/${mediaFile.objectPath}`
       : null);
 
   if (!streamingUrl) {
@@ -208,7 +207,7 @@ watch.get('/streaming-url/:movieId', async (c) => {
 // GET /api/watchlist - Get user's watchlist
 watch.get('/watchlist', async (c) => {
   const db = getDb(c.env.DATABASE_URL);
-  const userId = (c as any).get('userId') as number;
+  const userId = c.get('userId');
 
   const watchlist = await db
     .select({
@@ -235,7 +234,7 @@ watch.get('/watchlist', async (c) => {
 // POST /api/watchlist - Add movie to watchlist
 watch.post('/watchlist', async (c) => {
   const db = getDb(c.env.DATABASE_URL);
-  const userId = (c as any).get('userId') as number;
+  const userId = c.get('userId');
   const body = await c.req.json();
   const { movieId } = body;
 
@@ -270,7 +269,7 @@ watch.post('/watchlist', async (c) => {
 // DELETE /api/watchlist/:movieId - Remove from watchlist
 watch.delete('/watchlist/:movieId', async (c) => {
   const db = getDb(c.env.DATABASE_URL);
-  const userId = (c as any).get('userId') as number;
+  const userId = c.get('userId');
   const movieId = parseInt(c.req.param('movieId'));
 
   await db

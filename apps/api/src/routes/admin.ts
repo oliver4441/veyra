@@ -17,14 +17,12 @@ import type { AppContext } from '../index';
 
 const admin = new Hono<AppContext>();
 
-// Middleware to check admin role
+// Middleware to check admin role (userRole is resolved from Firebase in index.ts)
 admin.use('*', async (c, next) => {
-  const payload = c.get('jwtPayload');
-  if (!payload || (payload.role !== 'admin' && payload.role !== 'superadmin')) {
+  const role = c.get('userRole');
+  if (!role || (role !== 'admin' && role !== 'superadmin')) {
     return c.json({ error: 'Admin access required' }, 403);
   }
-  c.set('userId', payload.userId);
-  c.set('userRole', payload.role);
   await next();
 });
 

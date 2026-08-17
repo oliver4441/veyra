@@ -61,7 +61,11 @@ export const users = pgTable('users', {
   id: serial('id').primaryKey(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   username: varchar('username', { length: 50 }).notNull().unique(),
-  passwordHash: text('password_hash').notNull(),
+  // Firebase Auth UID (null for legacy accounts created before Firebase migration)
+  firebaseUid: varchar('firebase_uid', { length: 128 }).unique(),
+  // Legacy password hash — unused with Firebase Auth, kept nullable for old accounts
+  passwordHash: text('password_hash'),
+  emailVerified: boolean('email_verified').default(false).notNull(),
   displayName: varchar('display_name', { length: 100 }),
   avatarUrl: text('avatar_url'),
   role: userRoleEnum('role').default('user').notNull(),

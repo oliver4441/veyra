@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { api, type Movie, type DiscoveryItem, type TMDBAdminSearchResult } from '@/lib/api';
+import { useState, useEffect, useCallback } from 'react';
+import Navbar from '@/components/Navbar';
+import { api, type Movie, type DiscoveryItem } from '@/lib/api';
 
 export default function AdminMoviesPage() {
   const [tab, setTab] = useState<'tmdb' | 'local'>('tmdb');
@@ -18,11 +19,6 @@ export default function AdminMoviesPage() {
   const [importSuccess, setImportSuccess] = useState<string | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [importedMap, setImportedMap] = useState<Record<number, boolean>>({});
-
-  // Local movies state
-  const [localMovies, setLocalMovies] = useState<Movie[]>([]);
-  const [localLoading, setLocalLoading] = useState(false);
-  const [localError, setLocalError] = useState('');
 
   const handleTMDBSearch = useCallback(async () => {
     if (!tmdbQuery.trim()) return;
@@ -75,18 +71,11 @@ export default function AdminMoviesPage() {
     }
   }, []);
 
-  const handleRefreshMetadata = useCallback(async (movieId: number) => {
-    try {
-      await api.adminRefreshTMDB(movieId);
-      setImportSuccess('Metadata refreshed successfully!');
-    } catch (err: any) {
-      setImportError(err.message || 'Refresh failed');
-    }
-  }, []);
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <Navbar />
+      <div className="max-w-6xl mx-auto px-4 pt-24 pb-12">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Movie Management</h1>
@@ -321,9 +310,9 @@ function LocalMoviesList() {
   }, []);
 
   // Auto-fetch on mount
-  useState(() => {
+  useEffect(() => {
     fetchMovies();
-  });
+  }, [fetchMovies]);
 
   const handleRefresh = useCallback(async (movieId: number) => {
     setRefreshing(movieId);

@@ -18,7 +18,11 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     username VARCHAR(50) NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
+    -- Firebase Auth UID (null for legacy accounts created before Firebase migration)
+    firebase_uid VARCHAR(128) UNIQUE,
+    -- Legacy password hash — unused with Firebase Auth, kept nullable for old accounts
+    password_hash TEXT,
+    email_verified BOOLEAN DEFAULT false NOT NULL,
     display_name VARCHAR(100),
     avatar_url TEXT,
     role user_role DEFAULT 'user' NOT NULL,

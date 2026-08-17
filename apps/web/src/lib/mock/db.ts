@@ -119,6 +119,16 @@ export interface MockJob {
   error?: string;
 }
 
+export interface MockRatingEntry {
+  id: number;
+  userId: number;
+  movieId: number;
+  rating: number;
+  review?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface MockAuditEntry {
   id: number;
   userId?: number;
@@ -138,6 +148,7 @@ export interface MockDB {
   progress: MockWatchProgress[];
   watchlist: MockWatchlistEntry[];
   history: MockHistoryEntry[];
+  ratings: MockRatingEntry[];
   settings: MockSettings;
   jobs: MockJob[];
   audit: MockAuditEntry[];
@@ -765,6 +776,14 @@ const seedJobs: MockJob[] = [
   },
 ];
 
+const seedRatings: MockRatingEntry[] = [
+  { id: 1, userId: 2, movieId: 1, rating: 9, review: 'Incredible atmosphere and a brilliant cryptographer protagonist. The pacing kept me on the edge of my seat.', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString() },
+  { id: 2, userId: 3, movieId: 1, rating: 8, review: 'Solid thriller with some great set pieces. The ending felt slightly rushed.', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() },
+  { id: 3, userId: 2, movieId: 5, rating: 8, review: 'Beautifully shot space thriller. The stowaway mystery was captivating.', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString() },
+  { id: 4, userId: 4, movieId: 3, rating: 9, review: 'The neon-soaked cityscapes are mesmerizing. Cyberpunk done right.', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString() },
+  { id: 5, userId: 3, movieId: 13, rating: 9, review: 'Meridian is a masterclass in world-building. The cartographer protagonist is unforgettable.', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 96).toISOString(), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 96).toISOString() },
+];
+
 const seedAudit: MockAuditEntry[] = [
   { id: 1, userId: 1, username: 'admin', action: 'movie.create', target: 'The Midnight Echo', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 50).toISOString() },
   { id: 2, userId: 1, username: 'admin', action: 'movie.update', target: 'Quantum Drift', details: 'Set trending=true', createdAt: new Date(Date.now() - 1000 * 60 * 60 * 40).toISOString() },
@@ -791,6 +810,7 @@ function createSeedDB(): MockDB {
       subtitlesEnabled: true,
       downloadPreference: 'web',
     },
+    ratings: seedRatings,
     jobs: seedJobs,
     audit: seedAudit,
   };

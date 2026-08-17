@@ -1,33 +1,47 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Settings, Maximize, SkipBack, SkipForward } from 'lucide-react';
+import VideoPlayer from '@/components/VideoPlayer';
 import { api, type Movie } from '@/lib/api';
 
 export default function WatchPage() {
   const params = useParams();
   const router = useRouter();
   const movieId = parseInt(params.id as string);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   const [movie, setMovie] = useState<Movie | null>(null);
   const [streamingUrl, setStreamingUrl] = useState<string | null>(null);
   const [quality, setQuality] = useState('1080');
+  const [initialPosition, setInitialPosition] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ── Fetch movie details + streaming URL ─────────────────────
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Get streaming URL
-        const streamData = await api.getStreamingUrl(movieId, quality);
-        setStreamingUrl(streamData.streamingUrl);
+        const [streamData, progressData] = await Promise.allSettled([
+          api.getStreamingUrl(movieId, quality),
+          api.getWatchProgress(),
+        ]);
 
-        // Get movie details
-        // Note: We'd need to get the slug from the URL or fetch by ID
-        // For now, we'll use the movie ID
+        if (streamData.status === 'fulfilled') {
+          setStreamingUrl(streamData.value.streamingUrl);
+        } else {
+          throw new Error(streamData.reason?.message || 'Failed to load video');
+        }
+
+        // Restore watch progress
+        if (progressData.status === 'fulfilled') {
+          const progress = progressData.value.progress.find(
+            (p) => p.movieId === movieId && !p.completed
+          );
+          if (progress && progress.position > 0) {
+            setInitialPosition(progress.position);
+          }
+        }
       } catch (err: any) {
         setError(err.message || 'Failed to load video');
       } finally {
@@ -35,52 +49,73 @@ export default function WatchPage() {
       }
     };
 
-    if (movieId) {
-      fetchData();
-    }
+    if (movieId) fetchData();
   }, [movieId, quality]);
 
-  // Save watch progress periodically
+  // ── Fetch movie metadata for the title overlay ──────────────
   useEffect(() => {
-    if (!videoRef.current || !movieId) return;
-
-    const saveProgress = async () => {
-      const video = videoRef.current;
-      if (video && video.currentTime > 0) {
-        try {
-          await api.updateWatchProgress({
-            movieId,
-            position: Math.floor(video.currentTime),
-            duration: Math.floor(video.duration),
-          });
-        } catch {
-          // Silently fail - don't interrupt playback
-        }
+    const fetchMovie = async () => {
+      try {
+        // Try to get movie by ID through the search endpoint
+        const res = await api.getMovies({ limit: 50 });
+        const found = res.movies.find((m) => m.id === movieId);
+        if (found) setMovie(found);
+      } catch {
+        // Movie info not critical for playback
       }
     };
-
-    const interval = setInterval(saveProgress, 30000); // Save every 30 seconds
-
-    return () => clearInterval(interval);
+    if (movieId) fetchMovie();
   }, [movieId]);
 
-  // Save progress on unload
+  // ── Progress saving callback ────────────────────────────────
+  const handleProgress = useCallback(
+    async (position: number, duration: number) => {
+      if (!movieId || position <= 0) return;
+      try {
+        await api.updateWatchProgress({
+          movieId,
+          position,
+          duration,
+        });
+      } catch {
+        // Silently fail — don't interrupt playback
+      }
+    },
+    [movieId]
+  );
+
+  // ── Quality change handler ──────────────────────────────────
+  const handleQualityChange = useCallback((q: string) => {
+    // Save current position before switching
+    const video = document.querySelector('video');
+    const currentPosition = video?.currentTime || 0;
+    setInitialPosition(currentPosition);
+    setQuality(q);
+  }, []);
+
+  // ── Back navigation ────────────────────────────────────────
+  const handleBack = useCallback(() => {
+    if (movie?.slug) {
+      router.push(`/movie/${movie.slug}`);
+    } else {
+      router.back();
+    }
+  }, [movie, router]);
+
+  // ── Save progress on unload ────────────────────────────────
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (videoRef.current && movieId) {
-        const video = videoRef.current;
-        if (video.currentTime > 0) {
-          // Use sendBeacon for reliable delivery during page unload
-          const data = JSON.stringify({
-            movieId,
-            position: Math.floor(video.currentTime),
-            duration: Math.floor(video.duration),
-          });
-          navigator.sendBeacon(
-            `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787'}/api/watch/progress`,
-            new Blob([data], { type: 'application/json' })
-          );
-        }
+      const video = document.querySelector('video');
+      if (video && movieId && video.currentTime > 0) {
+        const data = JSON.stringify({
+          movieId,
+          position: Math.floor(video.currentTime),
+          duration: Math.floor(video.duration),
+        });
+        navigator.sendBeacon(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8787'}/api/watch/progress`,
+          new Blob([data], { type: 'application/json' })
+        );
       }
     };
 
@@ -88,71 +123,58 @@ export default function WatchPage() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [movieId]);
 
+  // ── Loading state ──────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-on-surface-variant text-sm">Loading video...</p>
+        </div>
       </div>
     );
   }
 
+  // ── Error state ────────────────────────────────────────────
   if (error) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold text-white mb-4">Playback Error</h1>
-        <p className="text-on-surface-variant mb-6">{error}</p>
-        <Link href="/" className="btn-primary">
-          Back to Home
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 px-6">
+        <span className="text-5xl">⚠️</span>
+        <h1 className="text-2xl font-bold text-white">Playback Error</h1>
+        <p className="text-on-surface-variant text-center max-w-md">{error}</p>
+        <Link
+          href={movie?.slug ? `/movie/${movie.slug}` : '/'}
+          className="bg-primary text-on-primary px-6 py-3 rounded-lg text-sm font-bold hover:bg-primary/90 transition-all"
+        >
+          {movie?.slug ? 'Back to Movie' : 'Back to Home'}
         </Link>
       </div>
     );
   }
 
+  // ── Player ─────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-black">
-      {/* Video Player */}
-      <div className="relative w-full h-screen">
-        {streamingUrl ? (
-          <video
-            ref={videoRef}
-            src={streamingUrl}
-            className="w-full h-full"
-            controls
-            autoPlay
-            playsInline
-          >
-            Your browser does not support the video tag.
-          </video>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-on-surface-variant">Loading video...</p>
-            </div>
+      {streamingUrl ? (
+        <VideoPlayer
+          src={streamingUrl}
+          title={movie?.title}
+          posterUrl={movie?.backdropUrl || movie?.posterUrl}
+          quality={quality}
+          onQualityChange={handleQualityChange}
+          qualities={['480', '720', '1080']}
+          onProgress={handleProgress}
+          initialPosition={initialPosition}
+          onBack={handleBack}
+        />
+      ) : (
+        <div className="w-full h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-on-surface-variant">Loading video...</p>
           </div>
-        )}
-
-        {/* Back button overlay */}
-        <button
-          onClick={() => router.back()}
-          className="absolute top-4 left-4 z-10 w-10 h-10 rounded-full glass-panel flex items-center justify-center text-white hover:bg-white/20 transition-colors"
-        >
-          <ArrowLeft size={20} />
-        </button>
-
-        {/* Quality selector overlay */}
-        <div className="absolute top-4 right-4 z-10">
-          <select
-            value={quality}
-            onChange={(e) => setQuality(e.target.value)}
-            className="glass-panel text-white px-3 py-2 rounded-lg bg-transparent border-none outline-none cursor-pointer"
-          >
-            <option value="480">480p</option>
-            <option value="720">720p</option>
-            <option value="1080">1080p</option>
-          </select>
         </div>
-      </div>
+      )}
     </div>
   );
 }

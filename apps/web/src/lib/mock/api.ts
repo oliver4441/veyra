@@ -141,61 +141,34 @@ export async function mockRequest(
   await delay(200);
 
   // ── Auth ────────────────────────────────────────────────────────────────
-  if (path === '/api/auth/register' && method === 'POST') {
-    const { email, username, password, displayName } = options.body || {};
-    if (!email || !username || !password) {
-      throw new Error('Email, username and password are required');
+  // Firebase token exchange — maps the Firebase user (or demo user) to the
+  // mock DB user so the app works end-to-end in demo mode.
+  if (path === '/api/auth/firebase' && method === 'POST') {
+    const { idToken } = options.body || {};
+    // Best-effort email extraction from the JWT payload (demo mode only)
+    let email = '';
+    if (idToken && typeof idToken === 'string') {
+      try {
+        const payloadPart = idToken.split('.')[1];
+        if (payloadPart) {
+          const decoded = JSON.parse(atob(payloadPart.replace(/-/g, '+').replace(/_/g, '/')));
+          email = decoded.email || '';
+        }
+      } catch {
+        // ignore malformed tokens
+      }
     }
-    if (db.users.some((u) => u.email.toLowerCase() === String(email).toLowerCase())) {
-      throw new Error('An account with this email already exists');
-    }
-    if (db.users.some((u) => u.username.toLowerCase() === String(username).toLowerCase())) {
-      throw new Error('This username is already taken');
-    }
-    const user: MockUser = {
-      id: uid(),
-      email,
-      username,
-      displayName: displayName || username,
-      avatarUrl: '',
-      role: 'user',
-      createdAt: new Date().toISOString(),
-    };
-    db.users.push(user);
-    const newSession = makeSession(user);
-    db.session = newSession;
-    saveDB();
-    addAudit('auth.register', username);
-    return { user: publicUser(user), accessToken: newSession.accessToken, refreshToken: newSession.refreshToken };
-  }
-
-  if (path === '/api/auth/login' && method === 'POST') {
-    const { email, password } = options.body || {};
-    const user = db.users.find(
-      (u) => u.email.toLowerCase() === String(email || '').toLowerCase()
-    );
+    let user = email
+      ? db.users.find((u) => u.email.toLowerCase() === email.toLowerCase())
+      : undefined;
     if (!user) {
-      throw new Error('Invalid email or password');
+      user = db.users.find((u) => u.id === 2) || db.users[0];
     }
     const newSession = makeSession(user);
     db.session = newSession;
     saveDB();
-    addAudit('auth.login', user.username);
-    return { user: publicUser(user), accessToken: newSession.accessToken, refreshToken: newSession.refreshToken };
-  }
-
-  if (path === '/api/auth/refresh' && method === 'POST') {
-    const user = db.users.find((u) => u.id === userId) || db.users[0];
-    const newSession = makeSession(user);
-    db.session = newSession;
-    saveDB();
-    return { user: publicUser(user), accessToken: newSession.accessToken, refreshToken: newSession.refreshToken };
-  }
-
-  if (path === '/api/auth/logout' && method === 'POST') {
-    db.session = null;
-    saveDB();
-    return { success: true };
+    addAudit('auth.firebase', user.username);
+    return { user: publicUser(user), isNewUser: false };
   }
 
   if (path === '/api/auth/me' && method === 'GET') {
@@ -414,6 +387,97 @@ export async function mockRequest(
     db.watchlist = db.watchlist.filter((w) => !(w.userId === userId && w.movieId === movieId));
     saveDB();
     return { success: true };
+  }
+
+  // ── Ratings ─────────────────────────────────────────────────────────────
+  const ratingsMovieMatch = path.match(/^\/api\/ratings\/movie\/(\d+)$/);
+  if (ratingsMovieMatch && method === 'GET') {
+    const movieId = parseInt(ratingsMovieMatch[1], 10);
+    const movieRatings = db.ratings
+      .filter((r) => r.movieId === movieId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .map((r) => {
+        const user = db.users.find((u) => u.id === r.userId);
+        return {
+          id: r.id,
+          rating: r.rating,
+          review: r.review,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
+          userId: r.userId,
+          username: user?.username || 'unknown',
+          displayName: user?.displayName || user?.username || 'Unknown',
+          avatarUrl: user?.avatarUrl || '',
+        };
+      });
+    const movieRatingEntries = db.ratings.filter((r) => r.movieId === movieId);
+    const avgRating = movieRatingEntries.length > 0
+      ? Math.round((movieRatingEntries.reduce((sum, r) => sum + r.rating, 0) / movieRatingEntries.length) * 10) / 10
+      : 0;
+    const userRatingEntry = db.ratings.find((r) => r.movieId === movieId && r.userId === userId);
+    return {
+      ratings: movieRatings,
+      stats: { average: avgRating, total: movieRatingEntries.length },
+      userRating: userRatingEntry ? { id: userRatingEntry.id, rating: userRatingEntry.rating, review: userRatingEntry.review } : null,
+    };
+  }
+
+  if (path === '/api/ratings' && method === 'POST') {
+    const { movieId, rating, review } = options.body || {};
+    if (!movieId || !rating) {
+      throw new Error('movieId and rating are required');
+    }
+    if (rating < 1 || rating > 10) {
+      throw new Error('Rating must be between 1 and 10');
+    }
+    const existing = db.ratings.find((r) => r.movieId === movieId && r.userId === userId);
+    if (existing) {
+      existing.rating = rating;
+      if (review !== undefined) existing.review = review;
+      existing.updatedAt = new Date().toISOString();
+      saveDB();
+      return { success: true, updated: true };
+    }
+    db.ratings.push({
+      id: uid(),
+      userId,
+      movieId,
+      rating,
+      review,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+    saveDB();
+    return { success: true, updated: false };
+  }
+
+  const ratingsDeleteMatch = path.match(/^\/api\/ratings\/(\d+)$/);
+  if (ratingsDeleteMatch && method === 'DELETE') {
+    const movieId = parseInt(ratingsDeleteMatch[1], 10);
+    db.ratings = db.ratings.filter((r) => !(r.movieId === movieId && r.userId === userId));
+    saveDB();
+    return { success: true };
+  }
+
+  if (path === '/api/ratings/user' && method === 'GET') {
+    const limit = parseInt(query.get('limit') || '50', 10);
+    const userRatings = db.ratings
+      .filter((r) => r.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, limit)
+      .map((r) => {
+        const movie = getMovieById(r.movieId);
+        return {
+          id: r.id,
+          rating: r.rating,
+          review: r.review,
+          createdAt: r.createdAt,
+          movie: movie
+            ? { id: movie.id, title: movie.title, slug: movie.slug, posterUrl: movie.posterUrl, year: movie.year, type: movie.type }
+            : null,
+        };
+      });
+    return { ratings: userRatings };
   }
 
   // ── Admin ───────────────────────────────────────────────────────────────
@@ -685,8 +749,37 @@ export async function mockRequest(
     return { success: true };
   }
 
-  if (path === '/api/storage/accounts/r2-default/test' && method === 'POST') {
-    return { health: { status: 'connected', message: 'Connection OK', lastChecked: new Date().toISOString(), latencyMs: 34 } };
+  // ── Storage Accounts CRUD ───────────────────────────────────────────────
+  if (path === '/api/storage/accounts' && method === 'POST') {
+    const body = options.body || {};
+    const newAccount = {
+      id: `${body.providerType}-${Date.now()}`,
+      providerType: body.providerType,
+      displayName: body.displayName || body.providerType,
+      status: 'connected',
+      purpose: body.purpose || 'general',
+      priority: body.priority || 5,
+      isDefault: false,
+      quotaTotal: null,
+      quotaUsed: null,
+      lastHealthCheck: new Date().toISOString(),
+      capabilities: null,
+    };
+    return { account: newAccount };
+  }
+
+  const accountsPutMatch = path.match(/^\/api\/storage\/accounts\/([^/]+)$/);
+  if (accountsPutMatch && method === 'PUT') {
+    return { account: { id: accountsPutMatch[1], ...options.body, updatedAt: new Date().toISOString() } };
+  }
+
+  if (accountsPutMatch && method === 'DELETE') {
+    return { success: true };
+  }
+
+  const accountsTestMatch = path.match(/^\/api\/storage\/accounts\/([^/]+)\/test$/);
+  if (accountsTestMatch && method === 'POST') {
+    return { health: { status: 'connected', message: 'Connection OK', lastChecked: new Date().toISOString(), latencyMs: 34 + Math.floor(Math.random() * 20) } };
   }
 
   // ── Fallback ─────────────────────────────────────────────────────────────

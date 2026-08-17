@@ -18,7 +18,7 @@ A premium cinematic streaming platform built with Next.js, Cloudflare Workers, a
 - **Database:** Neon PostgreSQL, Drizzle ORM
 - **Storage:** Cloudflare R2 (video, images, assets)
 - **Metadata/Discovery:** The Movie Database (TMDB) API v3
-- **Auth:** Custom JWT with PBKDF2 password hashing
+- **Auth:** Firebase Authentication (email/password, Google) with server-side ID token verification
 - **Deployment:** Vercel (frontend), Cloudflare (backend + storage)
 
 ## Project Structure
@@ -83,7 +83,8 @@ neonctl connection-string
 # Copy the example file
 cp apps/api/.dev.vars.example apps/api/.dev.vars
 
-# Edit .dev.vars with your Neon connection string and JWT secret
+# Edit .dev.vars with your Neon connection string, Firebase project id,
+# and admin emails
 ```
 
 ### 4. Initialize Database
@@ -104,12 +105,12 @@ npm run dev:web   # Starts Next.js on port 3000
 
 ## API Routes
 
-### Auth
-- `POST /api/auth/register` - Create account
-- `POST /api/auth/login` - Sign in
-- `POST /api/auth/refresh` - Refresh token
-- `POST /api/auth/logout` - Sign out
-- `GET /api/auth/me` - Get current user
+### Auth (Firebase)
+- `POST /api/auth/firebase` - Exchange a Firebase ID token for the Veyra user (auto-creates/links the account)
+- `GET /api/auth/me` - Get current user (bearer = Firebase ID token)
+- `PATCH /api/auth/profile` - Update display name / avatar
+
+Sign-in itself happens entirely in the browser via the Firebase SDK (email/password, Google). The resulting ID token is sent as a `Bearer` token on every API request and verified server-side against Google's JWKS.
 
 ### Movies
 - `GET /api/movies` - List movies (pagination, filtering)
@@ -178,11 +179,15 @@ vercel deploy
 ```bash
 cd apps/api
 
-# Set secrets
+# Set secrets (vars are configured in wrangler.jsonc)
 wrangler secret put DATABASE_URL
-wrangler secret put JWT_SECRET
 wrangler secret put CORS_ORIGIN
 wrangler secret put TMDB_API_READ_ACCESS_TOKEN
+
+# Set the Firebase project id (matches your Firebase web app config)
+# and admin emails in the "vars" block of wrangler.jsonc:
+#   FIREBASE_PROJECT_ID=omix-systems-cd1af
+#   ADMIN_EMAILS=you@gmail.com
 
 # Deploy
 wrangler deploy
