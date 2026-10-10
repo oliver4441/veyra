@@ -6,7 +6,8 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { Play, Bookmark, Share2, Clock, Calendar, Star, Send, Trash2, User, Check } from 'lucide-react';
 import { api, type Movie } from '@/lib/api';
-import { useUser } from '@/lib/use-user';
+import { getProfile } from '@/lib/guest';
+import SourceMatches from '@/components/SourceMatches';
 
 interface MovieRating {
   id: number;
@@ -27,7 +28,9 @@ interface RatingStats {
 export default function MovieDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const { user: authUser } = useUser();
+  // Veyra has no accounts: every visitor can rate, review and save. The API
+  // attributes it to their device id instead of a user row.
+  const authUser = { username: 'guest', displayName: getProfile().displayName };
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -300,6 +303,14 @@ export default function MovieDetailPage() {
             </section>
           )}
 
+          {/* Free, rights-cleared sources + where else it streams */}
+          <SourceMatches
+            title={movie.title}
+            year={movie.year}
+            tmdbId={movie.tmdbId}
+            mediaType={movie.tmdbMediaType === 'tv' ? 'tv' : 'movie'}
+          />
+
           {/* Trailer */}
           {movie.trailerUrl && (
             <section>
@@ -389,7 +400,7 @@ export default function MovieDetailPage() {
             )}
 
             {/* Write a Review */}
-            {authUser ? (
+            {authUser && (
               <div className="p-5 bg-surface-container rounded-xl mb-6">
                 <h3 className="text-white font-semibold mb-4">
                   {userRating ? 'Edit Your Review' : 'Write a Review'}
@@ -441,13 +452,6 @@ export default function MovieDetailPage() {
                     </button>
                   )}
                 </div>
-              </div>
-            ) : (
-              <div className="p-5 bg-surface-container rounded-xl text-center mb-6">
-                <p className="text-on-surface-variant text-sm">
-                  <Link href="/auth" className="text-primary hover:underline font-medium">Sign in</Link>
-                  {' '}to rate and review this title.
-                </p>
               </div>
             )}
 

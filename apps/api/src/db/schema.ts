@@ -55,6 +55,26 @@ export const storageHealthEnum = pgEnum('storage_health', [
 ]);
 export const qualityEnum = pgEnum('quality', ['480', '720', '1080', '4k']);
 
+// ── External source bindings ────────────────────────────────────────────────
+// A catalogue title can be *bound* to one or more places it can actually be
+// watched: an archive.org identifier, a YouTube video or playlist, or a deep
+// link to another free platform. This is how YouTube (and the Internet Archive)
+// become playback sources for Veyra's own catalogue without Veyra hosting files.
+export const sourceProviderEnum = pgEnum('source_provider', [
+  'archive', // archive.org — streamable AND downloadable (public domain / CC)
+  'youtube', // official embed only; downloads are not permitted by their terms
+  'external', // Tubi / Pluto / Plex / … — deep link out, never proxied
+  'veyra-r2', // our own Cloudflare R2 storage
+  'terabox', // operator-provided bulk storage
+]);
+export const playbackKindEnum = pgEnum('playback_kind', [
+  'video', // progressive file → <video src>
+  'hls', // .m3u8 → hls.js
+  'iframe', // official embed player
+  'external', // hand off to the provider's own app/site
+]);
+export const downloadPolicyEnum = pgEnum('download_policy', ['allowed', 'blocked']);
+
 // ==================== Users & Auth ====================
 
 export const users = pgTable('users', {
@@ -273,6 +293,48 @@ export const ratings = pgTable('ratings', {
   movieId: integer('movie_id').references(() => movies.id, { onDelete: 'cascade' }).notNull(),
   rating: integer('rating').notNull(), // 1-10
   review: text('review'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// ==================== Media Sources ====================
+// One row per (title or episode) × provider binding. A movie may have several:
+// an archive.org copy that can be downloaded, a YouTube embed for convenience,
+// and a Tubi deep link for the licensed stream. The player walks them in
+// `priority` order and falls through when one fails.
+
+export const mediaSources = pgTable('media_sources', {
+  id: serial('id').primaryKey(),
+  movieId: integer('movie_id').references(() => movies.id, { onDelete: 'cascade' }).notNull(),
+  /** Set when the binding is for one episode of a series rather than the title. */
+  episodeId: integer('episode_id').references(() => episodes.id, { onDelete: 'cascade' }),
+  provider: sourceProviderEnum('provider').notNull(),
+  /** Provider-native identifier: archive.org identifier, YouTube videoId… */
+  externalId: text('external_id').notNull(),
+  playbackKind: playbackKindEnum('playback_kind').default('iframe').notNull(),
+  /** Ready-to-use URLs. The client may also re-derive them from externalId. */
+  embedUrl: text('embed_url'),
+  mediaUrl: text('media_url'),
+  externalUrl: text('external_url'),
+  /**
+   * Whether this binding may be saved to local storage. YouTube and the
+   * external platforms are always `blocked`; archive.org is `allowed` only once
+   * the item's licence has been checked.
+   */
+  downloadPolicy: downloadPolicyEnum('download_policy').default('blocked').notNull(),
+  rightsStatus: rightsStatusEnum('rights_status').default('pending_review').notNull(),
+  /** Human-readable licence, e.g. "Public Domain", "CC BY 4.0". */
+  license: varchar('license', { length: 64 }),
+  licenseUrl: text('license_url'),
+  attribution: text('attribution'),
+  /** ISO-3166-1 region for providers whose catalogue is geo-scoped. */
+  region: varchar('region', { length: 2 }),
+  /** Lower number = tried first. */
+  priority: integer('priority').default(5).notNull(),
+  label: varchar('label', { length: 120 }),
+  /** When an operator last confirmed this binding still resolves. */
+  verifiedAt: timestamp('verified_at'),
+  metadata: jsonb('metadata').$type<Record<string, unknown>>(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });

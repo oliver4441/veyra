@@ -13,11 +13,19 @@ const footerLinks = [
     ],
   },
   {
-    title: 'Account',
+    title: 'Library',
     links: [
-      { label: 'Profile', href: '/profile' },
-      { label: 'Watchlist', href: '/watchlist' },
-      { label: 'Sign In', href: '/auth' },
+      { label: 'My List', href: '/watchlist' },
+      { label: 'Downloads', href: '/downloads' },
+      { label: 'Preferences', href: '/profile' },
+    ],
+  },
+  {
+    title: 'Sources',
+    links: [
+      { label: 'Internet Archive', href: '/search?source=archive' },
+      { label: 'YouTube', href: '/search?source=youtube' },
+      { label: 'Where to watch', href: '/search' },
     ],
   },
   {
@@ -40,7 +48,8 @@ export default function Footer() {
             Veyra
           </Link>
           <p className="text-on-surface-variant text-sm mt-2 max-w-md">
-            Your world of movies and series. Stream, discover, and track everything you watch.
+            Free films from the Internet Archive and YouTube, plus legal links to every other
+            platform that streams a title. No account, no subscription.
           </p>
         </div>
 
@@ -69,9 +78,13 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-white/5">
-          <p className="text-on-surface-variant/60 text-xs">
-            © {new Date().getFullYear()} Veyra. All rights reserved.
-          </p>
+          <div className="text-on-surface-variant/60 text-xs space-y-1 text-center md:text-left">
+            <p>© {new Date().getFullYear()} Veyra.</p>
+            <p>
+              Metadata from TMDB. Films courtesy of the Internet Archive. Veyra does not host or
+              redistribute third-party content.
+            </p>
+          </div>
           <div className="flex items-center gap-4">
             {/* GitHub */}
             <a

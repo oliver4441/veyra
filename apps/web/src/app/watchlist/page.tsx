@@ -1,11 +1,22 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+// ─────────────────────────────────────────────────────────────────────────────
+// /watchlist — My List
+// ─────────────────────────────────────────────────────────────────────────────
+// Two shelves, because there are two kinds of thing you can save:
+//   • titles from free sources (archive.org, YouTube) → kept on this device
+//   • titles from your own catalogue → kept by the API, keyed to the device id
+// ─────────────────────────────────────────────────────────────────────────────
+
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Bookmark, Clock, Download, Film, Trash2 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-import { Bookmark, Trash2, Loader2, Film, Plus } from 'lucide-react';
-import { api, type Movie } from '@/lib/api';
+import Footer from '@/components/Footer';
+import SourceCard, { ProviderBadge, formatRuntime } from '@/components/SourceCard';
 import { SkeletonGrid } from '@/components/SkeletonCard';
+import { api, type Movie } from '@/lib/api';
+import { getMyList, removeFromMyList, subscribeGuestStore, type SavedItem } from '@/lib/mylist';
 
 interface WatchlistItem {
   id: number;
@@ -14,9 +25,15 @@ interface WatchlistItem {
 }
 
 export default function WatchlistPage() {
+  const [saved, setSaved] = useState<SavedItem[]>([]);
   const [items, setItems] = useState<WatchlistItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [removingId, setRemovingId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const sync = () => setSaved(getMyList());
+    sync();
+    return subscribeGuestStore(sync);
+  }, []);
 
   const fetchWatchlist = useCallback(async () => {
     try {
@@ -33,13 +50,12 @@ export default function WatchlistPage() {
     fetchWatchlist();
   }, [fetchWatchlist]);
 
-  const handleRemove = async (movieId: number) => {
-    setRemovingId(movieId);
+  const handleRemoveCatalog = async (movieId: number) => {
     try {
       await api.removeFromWatchlist(movieId);
       setItems((prev) => prev.filter((i) => i.movie.id !== movieId));
-    } finally {
-      setRemovingId(null);
+    } catch {
+      // ignore
     }
   };
 
@@ -50,142 +66,153 @@ export default function WatchlistPage() {
     return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
   };
 
+  const empty = saved.length === 0 && items.length === 0 && !loading;
+
   return (
     <div className="min-h-screen">
       <Navbar />
 
       <main className="pt-24 pb-32 px-5 md:px-16 max-w-[1440px] mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <Bookmark className="w-6 h-6 text-primary" />
-              <h1 className="font-headline-md text-3xl md:text-4xl text-white">My Watchlist</h1>
-            </div>
+            <h1 className="font-headline-lg text-2xl md:text-4xl text-white font-bold mb-1">
+              My List
+            </h1>
             <p className="text-on-surface-variant text-sm">
-              {loading ? (
-                <span className="inline-block w-28 h-4 bg-surface-container rounded animate-pulse" />
-              ) : (
-                `${items.length} saved title${items.length === 1 ? '' : 's'}`
-              )}
+              Saved on this device — no account, no sync, nothing leaves your phone.
             </p>
           </div>
-          {!loading && items.length > 0 && (
-            <Link
-              href="/browse"
-              className="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary/90 transition-all"
-            >
-              <Plus size={16} />
-              Add More
-            </Link>
-          )}
+          <span className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-on-surface-variant text-xs">
+            <Bookmark size={13} /> {saved.length + items.length} saved
+          </span>
         </div>
 
-        {/* Content */}
+        {/* Free sources */}
+        {saved.length > 0 && (
+          <section className="mb-12">
+            <h2 className="font-headline-md text-base md:text-lg text-white font-semibold mb-4">
+              From free sources
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {saved.map((item) => (
+                <div key={`${item.provider}:${item.id}`} className="relative group">
+                  <SourceCard
+                    item={{
+                      provider: item.provider,
+                      id: item.id,
+                      title: item.title,
+                      year: item.year,
+                      posterUrl: item.posterUrl,
+                      kind: item.kind,
+                      license: item.license,
+                    }}
+                    size="sm"
+                  />
+                  <button
+                    onClick={() => removeFromMyList(item.provider, item.id)}
+                    aria-label={`Remove ${item.title}`}
+                    className="absolute top-2 right-2 z-20 p-1.5 rounded-lg bg-black/70 backdrop-blur-sm text-white/70 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Catalogue */}
         {loading ? (
-          <SkeletonGrid count={10} size="sm" />
+          <SkeletonGrid count={5} size="sm" />
         ) : items.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="group relative flex gap-4 p-4 bg-surface-container rounded-xl border border-white/5 hover:border-white/10 transition-all duration-200"
-              >
-                {/* Poster */}
-                <Link
-                  href={`/movie/${item.movie.slug}`}
-                  className="flex-shrink-0"
+          <section className="mb-12">
+            <h2 className="font-headline-md text-base md:text-lg text-white font-semibold mb-4">
+              From your library
+            </h2>
+            <div className="space-y-3">
+              {items.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center gap-4 p-3 rounded-xl bg-surface-container border border-white/5 hover:border-white/15 transition-all"
                 >
-                  {item.movie.posterUrl ? (
+                  {entry.movie.posterUrl ? (
                     <img
-                      src={item.movie.posterUrl}
-                      alt={item.movie.title}
-                      className="w-20 h-28 object-cover rounded-lg"
+                      src={entry.movie.posterUrl}
+                      alt=""
+                      className="w-14 h-20 rounded-lg object-cover shrink-0"
                     />
                   ) : (
-                    <div className="w-20 h-28 bg-surface-variant rounded-lg flex items-center justify-center">
-                      <Film size={24} className="text-on-surface-variant" />
+                    <div className="w-14 h-20 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                      <Film size={18} className="text-on-surface-variant" />
                     </div>
                   )}
-                </Link>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0 py-1">
-                  <Link href={`/movie/${item.movie.slug}`}>
-                    <h3 className="text-white font-semibold truncate group-hover:text-primary transition-colors">
-                      {item.movie.title}
-                    </h3>
-                  </Link>
-
-                  <div className="flex items-center gap-2 mt-1 text-on-surface-variant text-xs">
-                    {item.movie.year && <span>{item.movie.year}</span>}
-                    {item.movie.duration && (
-                      <>
-                        <span className="text-white/20">·</span>
-                        <span>{formatDuration(item.movie.duration)}</span>
-                      </>
-                    )}
-                    {item.movie.type === 'series' && (
-                      <>
-                        <span className="text-white/20">·</span>
-                        <span className="text-primary">Series</span>
-                      </>
-                    )}
-                  </div>
-
-                  {item.movie.genres && item.movie.genres.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {item.movie.genres.slice(0, 3).map((g) => (
-                        <span
-                          key={g.id}
-                          className="px-2 py-0.5 bg-white/5 text-on-surface-variant text-[10px] rounded"
-                        >
-                          {g.name}
+                  <div className="min-w-0 flex-1">
+                    <Link
+                      href={`/movie/${entry.movie.slug}`}
+                      className="block text-white font-semibold text-sm md:text-base truncate hover:text-primary transition-colors"
+                    >
+                      {entry.movie.title}
+                    </Link>
+                    <div className="flex items-center gap-3 text-on-surface-variant text-xs mt-1">
+                      {entry.movie.year && <span>{entry.movie.year}</span>}
+                      {entry.movie.duration && (
+                        <span className="inline-flex items-center gap-1">
+                          <Clock size={11} /> {formatDuration(entry.movie.duration)}
                         </span>
-                      ))}
+                      )}
+                      <ProviderBadge provider="veyra" />
                     </div>
-                  )}
-
-                  <p className="text-on-surface-variant/60 text-xs mt-2">
-                    Added {new Date(item.addedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Link
+                      href={`/watch/${entry.movie.id}`}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary text-on-primary text-xs font-bold hover:bg-primary/90"
+                    >
+                      <Film size={13} /> Watch
+                    </Link>
+                    <button
+                      onClick={() => handleRemoveCatalog(entry.movie.id)}
+                      aria-label={`Remove ${entry.movie.title}`}
+                      className="p-2 rounded-lg bg-white/5 border border-white/10 text-on-surface-variant hover:text-red-400"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
-                {/* Remove button */}
-                <button
-                  onClick={() => handleRemove(item.movie.id)}
-                  disabled={removingId === item.movie.id}
-                  aria-label={`Remove ${item.movie.title} from watchlist`}
-                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface-container-high/50 flex items-center justify-center text-on-surface-variant hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50"
-                >
-                  {removingId === item.movie.id ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Trash2 className="w-3.5 h-3.5" />
-                  )}
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          /* Empty State */
+        {empty && (
           <div className="text-center py-20">
             <div className="w-20 h-20 rounded-full bg-surface-container flex items-center justify-center mx-auto mb-6">
-              <Bookmark size={32} className="text-on-surface-variant opacity-50" />
+              <Bookmark size={30} className="text-on-surface-variant" />
             </div>
-            <h2 className="font-headline-md text-xl text-white mb-2">Your watchlist is empty</h2>
-            <p className="text-on-surface-variant text-sm max-w-md mx-auto mb-8">
-              Save movies and series you want to watch later. They&apos;ll show up here, ready when you are.
+            <h2 className="font-headline-md text-xl text-white mb-2">Nothing saved yet</h2>
+            <p className="text-on-surface-variant text-sm max-w-md mx-auto mb-6">
+              Tap <strong className="text-white">My List</strong> on any title. Public-domain films
+              from the Internet Archive can also be downloaded for offline watching.
             </p>
-            <Link
-              href="/browse"
-              className="inline-flex items-center gap-2 bg-primary text-on-primary px-6 py-3 rounded-lg text-sm font-bold hover:bg-primary/90 transition-all"
-            >
-              Browse Titles
-            </Link>
+            <div className="flex items-center justify-center gap-3 flex-wrap">
+              <Link
+                href="/search"
+                className="inline-flex items-center gap-2 bg-primary text-on-primary px-5 py-2.5 rounded-xl text-sm font-bold"
+              >
+                Find something
+              </Link>
+              <Link
+                href="/downloads"
+                className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-white/10"
+              >
+                <Download size={15} /> Downloads
+              </Link>
+            </div>
           </div>
         )}
       </main>
+
+      <Footer />
     </div>
   );
 }

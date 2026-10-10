@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { getTMDB, TMDBService, type TMDBTrendingItem, type TMDBMovieResult, type TVResult } from '../lib/tmdb';
+import { getWatchProviders } from '../lib/watch-providers';
 import type { Env } from '../index';
 
 const discovery = new Hono<{ Bindings: Env }>();
@@ -306,6 +307,48 @@ discovery.get('/tv/:tmdbId/recommendations', async (c) => {
     return c.json({ error: 'TMDB recommendations failed', details: error.message }, 502);
   }
 });
+
+// ── Watch providers (legal availability) ─────────────────────────
+// Which services stream this title in the visitor's region. Veyra links out to
+// them; it never proxies or re-hosts their streams.
+
+function providerHandler(mediaType: 'movie' | 'tv') {
+  return async (c: any) => {
+    const token = c.env.TMDB_API_READ_ACCESS_TOKEN;
+    if (!token) {
+      return c.json({ error: 'TMDB not configured' }, 503);
+    }
+
+    const tmdbId = parseInt(c.req.param('tmdbId'), 10);
+    if (!tmdbId || Number.isNaN(tmdbId)) {
+      return c.json({ error: 'A valid TMDB id is required' }, 400);
+    }
+
+    const region = (c.req.query('region') || 'US').toUpperCase().slice(0, 2);
+
+    try {
+      const providers = await getWatchProviders(token, mediaType, tmdbId, region);
+      if (!providers) {
+        return c.json({ providers: null }, 404);
+      }
+
+      // Availability changes rarely; let the edge cache it for a day.
+      c.header('Cache-Control', 'public, max-age=86400, s-maxage=604800');
+      return c.json({ providers });
+    } catch (error: any) {
+      return c.json(
+        { error: 'Watch provider lookup failed', details: error?.message },
+        502
+      );
+    }
+  };
+}
+
+// GET /api/discovery/movie/:tmdbId/watch-providers?region=KE
+discovery.get('/movie/:tmdbId/watch-providers', providerHandler('movie'));
+
+// GET /api/discovery/tv/:tmdbId/watch-providers?region=KE
+discovery.get('/tv/:tmdbId/watch-providers', providerHandler('tv'));
 
 // ── Genres ───────────────────────────────────────────────────────
 

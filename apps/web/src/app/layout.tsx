@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import PWAProvider from '@/components/PWAProvider';
+import { DownloadsProvider } from '@/lib/downloads/use-downloads';
 import Footer from '@/components/Footer';
 import './globals.css';
 
@@ -8,7 +9,8 @@ export const metadata: Metadata = {
     default: 'Veyra - Your World of Movies',
     template: '%s | Veyra',
   },
-  description: 'A premium cinematic streaming experience. Watch movies and series in stunning quality.',
+  description:
+    'A premium cinematic streaming experience. Watch and download free, rights-cleared films from the Internet Archive and YouTube — no account required.',
   keywords: ['streaming', 'movies', 'series', 'watch', 'cinema', 'entertainment', 'pwa'],
   authors: [{ name: 'Veyra' }],
   openGraph: {
@@ -108,7 +110,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-background text-on-surface font-body-md text-body-md antialiased">
         <PWAProvider>
-          {children}
+          <DownloadsProvider>{children}</DownloadsProvider>
           <Footer />
         </PWAProvider>
       </body>

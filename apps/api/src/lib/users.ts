@@ -123,3 +123,107 @@ export async function getOrCreateUser(
 
   return { user: newUser, isNewUser: true };
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Accountless identities
+// ─────────────────────────────────────────────────────────────────────────────
+// Veyra has no sign-up and no sign-in. Two kinds of caller still need a row in
+// `users` so the existing watchlist / progress / ratings tables keep working:
+//
+//   • a guest — identified only by an opaque device id the app generates locally
+//   • an admin — identified by the ADMIN_ACCESS_KEY shared secret
+//
+// Neither carries an email address or password. The synthetic addresses below
+// exist purely to satisfy the unique NOT NULL columns; they are never sent to
+// anyone and cannot be used to sign in.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GUEST_DOMAIN = 'device.veyra.local';
+const ADMIN_KEY_EMAIL = 'admin-key@veyra.local';
+
+/** Keep the device id out of the email/username by hashing it lightly. */
+function hashDeviceId(deviceId: string): string {
+  let hash = 2166136261;
+  for (let i = 0; i < deviceId.length; i++) {
+    hash ^= deviceId.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  // 32-bit FNV-1a is plenty: collisions only merge two anonymous watchlists.
+  return (hash >>> 0).toString(36);
+}
+
+/**
+ * Resolve (or create) the guest row for one device.
+ * Safe to call on every request — it is a single indexed lookup in the common
+ * case.
+ */
+export async function getOrCreateGuestUser(
+  db: Database,
+  deviceId: string
+): Promise<{ user: UserRow; isNewUser: boolean }> {
+  const normalized = deviceId.trim().slice(0, 128);
+  if (!normalized) {
+    throw new Error('A device id is required for guest access');
+  }
+  const email = `${hashDeviceId(normalized)}@${GUEST_DOMAIN}`;
+
+  const [existing] = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  if (existing) return { user: existing, isNewUser: false };
+
+  const username = `guest_${hashDeviceId(normalized)}`;
+  const [created] = await db
+    .insert(users)
+    .values({
+      email,
+      username,
+      passwordHash: null,
+      firebaseUid: null,
+      emailVerified: false,
+      displayName: 'Guest',
+      avatarUrl: null,
+      role: 'user',
+    })
+    .returning();
+
+  return { user: created, isNewUser: true };
+}
+
+/**
+ * Resolve (or create) the single shared admin row used by ADMIN_ACCESS_KEY.
+ * Deliberately one row for the whole deployment: the key is an operator
+ * credential, not a per-person account.
+ */
+export async function getOrCreateAdminKeyUser(db: Database): Promise<UserRow> {
+  const [existing] = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, ADMIN_KEY_EMAIL))
+    .limit(1);
+  if (existing) return existing;
+
+  const [created] = await db
+    .insert(users)
+    .values({
+      email: ADMIN_KEY_EMAIL,
+      username: 'admin_key',
+      passwordHash: null,
+      firebaseUid: null,
+      emailVerified: false,
+      displayName: 'Operator',
+      avatarUrl: null,
+      role: 'admin',
+    })
+    .returning();
+  return created;
+}
+
+/** Constant-time-ish comparison so key guessing cannot be timed. */
+export function safeEqual(a: string, b: string): boolean {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  if (a.length !== b.length) return false;
+  let mismatch = 0;
+  for (let i = 0; i < a.length; i++) {
+    mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return mismatch === 0;
+}
