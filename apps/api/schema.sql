@@ -254,6 +254,46 @@ CREATE INDEX idx_ratings_movie_id ON ratings(movie_id);
 CREATE INDEX idx_audit_logs_user_id ON audit_logs(user_id);
 CREATE INDEX idx_audit_logs_entity ON audit_logs(entity_type, entity_id);
 
+-- ==================== Enums: External Source Bindings ====================
+
+CREATE TYPE source_provider AS ENUM ('archive', 'youtube', 'external', 'veyra-r2', 'terabox');
+CREATE TYPE playback_kind AS ENUM ('video', 'hls', 'iframe', 'external');
+CREATE TYPE download_policy AS ENUM ('allowed', 'blocked');
+
+-- ==================== Media Sources ====================
+-- Binds a catalogue title (or one episode) to a place it can actually be
+-- watched: an archive.org identifier, a YouTube video/playlist embed, or a deep
+-- link to another free platform. The player walks bindings in priority order.
+
+CREATE TABLE media_sources (
+    id SERIAL PRIMARY KEY,
+    movie_id INTEGER NOT NULL REFERENCES movies(id) ON DELETE CASCADE,
+    episode_id INTEGER REFERENCES episodes(id) ON DELETE CASCADE,
+    provider source_provider NOT NULL,
+    external_id TEXT NOT NULL,
+    playback_kind playback_kind NOT NULL DEFAULT 'iframe',
+    embed_url TEXT,
+    media_url TEXT,
+    external_url TEXT,
+    download_policy download_policy NOT NULL DEFAULT 'blocked',
+    rights_status rights_status NOT NULL DEFAULT 'pending_review',
+    license VARCHAR(64),
+    license_url TEXT,
+    attribution TEXT,
+    region VARCHAR(2),
+    priority INTEGER NOT NULL DEFAULT 5,
+    label VARCHAR(120),
+    verified_at TIMESTAMP,
+    metadata JSONB,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_media_sources_movie_id ON media_sources(movie_id);
+CREATE INDEX idx_media_sources_episode_id ON media_sources(episode_id);
+CREATE UNIQUE INDEX idx_media_sources_unique_binding
+    ON media_sources(movie_id, COALESCE(episode_id, 0), provider, external_id);
+
 -- ==================== Insert Default Data ====================
 
 -- Insert default genres

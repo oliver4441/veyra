@@ -1,55 +1,81 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { Search, Bell, Bookmark, Menu, X, User, ChevronDown, LogOut, Settings } from 'lucide-react';
-import { useUser } from '@/lib/use-user';
+import { usePathname } from 'next/navigation';
+import {
+  Bookmark,
+  Download,
+  Menu,
+  Search,
+  Settings,
+  Shield,
+  X,
+} from 'lucide-react';
+import { useDownloads, useDownloadSubscription } from '@/lib/downloads/use-downloads';
+import { getMyList, subscribeGuestStore } from '@/lib/mylist';
 
 const navLinks = [
   { href: '/', label: 'Home' },
-  { href: '/?type=movie', label: 'Movies' },
-  { href: '/?type=series', label: 'Series' },
   { href: '/browse', label: 'Browse' },
+  { href: '/search', label: 'Search' },
+  { href: '/downloads', label: 'Downloads' },
+  { href: '/watchlist', label: 'My List' },
 ];
 
+/**
+ * Global navigation.
+ *
+ * Veyra has no accounts, so there is no sign-in button and no user menu. The
+ * right-hand side is purely functional: search, the download queue (with a live
+ * badge) and the on-device list. Admin is still reachable, but it is gated by a
+ * server-side key on the admin pages themselves — never from this bar.
+ */
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
-  const { user, loading, signOut } = useUser();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const jobs = useDownloadSubscription();
+  const manager = useDownloads();
+  const activeDownloads = useMemo(
+    () =>
+      jobs.reduce(
+        (sum, job) =>
+          sum + job.items.filter((i) => i.state === 'downloading' || i.state === 'queued').length,
+        0
+      ),
+    [jobs]
+  );
+
+  const [savedCount, setSavedCount] = useState(0);
+  useEffect(() => {
+    const sync = () => setSavedCount(getMyList().length);
+    sync();
+    return subscribeGuestStore(sync);
+  }, [pathname]);
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setMenuOpen(false);
-      }
+    const onClick = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) setMenuOpen(false);
     };
     document.addEventListener('mousedown', onClick);
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
 
-  const handleSignOut = async () => {
+  useEffect(() => {
+    setMobileMenuOpen(false);
     setMenuOpen(false);
-    await signOut();
-    router.push('/');
-  };
-
-  const initials = user?.displayName
-    ?.split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((s) => s[0]?.toUpperCase())
-    .join('') || user?.username?.slice(0, 2).toUpperCase() || 'U';
+  }, [pathname]);
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -66,7 +92,7 @@ export default function Navbar() {
     >
       <div className="max-w-[1440px] mx-auto px-4 md:px-16">
         <div className="flex justify-between items-center h-16 md:h-[72px]">
-          {/* Left: Logo + Nav Links */}
+          {/* Left */}
           <div className="flex items-center gap-8">
             <Link
               href="/"
@@ -75,44 +101,31 @@ export default function Navbar() {
               Veyra
             </Link>
 
-            {/* Desktop nav links */}
             <div className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 rounded-lg ${
-                    isActive(link.href)
-                      ? 'text-white'
-                      : 'text-on-surface-variant hover:text-white'
+                    isActive(link.href) ? 'text-white' : 'text-on-surface-variant hover:text-white'
                   }`}
                 >
                   {link.label}
-                  {/* Active indicator dot */}
+                  {link.href === '/downloads' && activeDownloads > 0 && (
+                    <span className="ml-1.5 px-1.5 py-0.5 rounded-md bg-primary/20 text-primary text-[10px] font-bold align-middle">
+                      {activeDownloads}
+                    </span>
+                  )}
                   {isActive(link.href) && (
                     <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
                   )}
                 </Link>
               ))}
-              <Link
-                href="/search"
-                className={`relative px-3 py-2 text-sm font-medium transition-colors duration-200 rounded-lg ${
-                  pathname === '/search'
-                    ? 'text-white'
-                    : 'text-on-surface-variant hover:text-white'
-                }`}
-              >
-                Search
-                {pathname === '/search' && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
-                )}
-              </Link>
             </div>
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2 md:gap-3">
-            {/* Search icon (mobile) */}
+          {/* Right */}
+          <div className="flex items-center gap-1.5 md:gap-2">
             <Link
               href="/search"
               className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-all"
@@ -121,111 +134,84 @@ export default function Navbar() {
               <Search size={18} />
             </Link>
 
-            {/* Watchlist */}
             <Link
-              href="/watchlist"
-              aria-label="My List"
-              className="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-all hidden md:flex"
+              href="/downloads"
+              className="relative w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-all"
+              aria-label="Downloads"
             >
-              <Bookmark size={18} />
+              <Download size={18} />
+              {activeDownloads > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-primary text-on-primary text-[9px] font-bold flex items-center justify-center">
+                  {activeDownloads}
+                </span>
+              )}
             </Link>
 
-            {/* Notifications */}
-            <button
-              aria-label="Notifications"
-              className="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-all hidden md:flex"
+            <Link
+              href="/watchlist"
+              className="relative w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-all"
+              aria-label="My List"
             >
-              <Bell size={18} />
-            </button>
+              <Bookmark size={18} />
+              {savedCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-white/15 text-white text-[9px] font-bold flex items-center justify-center">
+                  {savedCount}
+                </span>
+              )}
+            </Link>
 
-            {/* User menu / Sign In */}
-            {!loading && user ? (
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setMenuOpen((v) => !v)}
-                  className="flex items-center gap-2 rounded-full hover:bg-white/10 transition-all py-1 px-1"
-                  aria-label="Account menu"
-                >
-                  {user.avatarUrl ? (
-                    <img
-                      src={user.avatarUrl}
-                      alt=""
-                      className="w-8 h-8 rounded-full object-cover ring-2 ring-transparent group-hover:ring-primary/50"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <span className="w-8 h-8 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 text-primary flex items-center justify-center text-xs font-bold border border-primary/20">
-                      {initials}
-                    </span>
-                  )}
-                  <ChevronDown
-                    size={14}
-                    className={`text-on-surface-variant transition-transform duration-200 hidden sm:block ${
-                      menuOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
+            {/* Settings menu */}
+            <div className="relative hidden md:block" ref={menuRef}>
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
+                className="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-all"
+                aria-label="Settings"
+                aria-expanded={menuOpen}
+              >
+                <Settings size={18} />
+              </button>
 
-                {menuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 glass-panel border border-white/10 rounded-xl py-1.5 animate-slide-up shadow-2xl shadow-black/40">
-                    {/* User info */}
-                    <div className="px-4 py-3 border-b border-white/5">
-                      <p className="text-sm font-semibold text-white truncate">
-                        {user.displayName || user.username}
-                      </p>
-                      <p className="text-xs text-on-surface-variant truncate mt-0.5">
-                        {user.email}
-                      </p>
-                    </div>
-
-                    {/* Menu items */}
-                    <div className="py-1.5">
-                      <Link
-                        href="/profile"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
-                      >
-                        <Settings size={15} className="opacity-60" />
-                        Profile
-                      </Link>
-                      <Link
-                        href="/watchlist"
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
-                      >
-                        <Bookmark size={15} className="opacity-60" />
-                        My List
-                      </Link>
-                    </div>
-
-                    {/* Sign out */}
-                    <div className="border-t border-white/5 pt-1.5">
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
-                      >
-                        <LogOut size={15} />
-                        Sign Out
-                      </button>
-                    </div>
+              {menuOpen && (
+                <div className="absolute right-0 mt-2 w-60 glass-panel rounded-xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden animate-slide-up">
+                  <div className="px-4 py-3 border-b border-white/5">
+                    <p className="text-white text-sm font-semibold">Guest on this device</p>
+                    <p className="text-on-surface-variant text-[11px] mt-0.5 leading-snug">
+                      No account needed. Your list, resume points and downloads stay on this device.
+                    </p>
                   </div>
-                )}
-              </div>
-            ) : (
-              !loading && (
-                <Link
-                  href="/auth"
-                  className="bg-primary text-on-primary px-5 py-2 rounded-lg text-sm font-bold hover:bg-primary/90 transition-all duration-200 shadow-lg shadow-primary/20"
-                >
-                  Sign In
-                </Link>
-              )
-            )}
+                  <Link
+                    href="/profile"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <Settings size={15} /> Preferences
+                  </Link>
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <Shield size={15} /> Admin (key required)
+                  </Link>
+                  {activeDownloads > 0 && (
+                    <button
+                      onClick={() => {
+                        void manager.archiveCompleted();
+                        setMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors border-t border-white/5"
+                    >
+                      <Download size={15} /> Clear finished downloads
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Mobile menu toggle */}
             <button
               className="md:hidden w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-all"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => setMobileMenuOpen((v) => !v)}
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -242,58 +228,36 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
+                className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors flex items-center justify-between ${
                   isActive(link.href)
                     ? 'text-white bg-white/5'
                     : 'text-on-surface-variant hover:text-white hover:bg-white/5'
                 }`}
-                onClick={() => setMobileMenuOpen(false)}
               >
                 {link.label}
+                {link.href === '/downloads' && activeDownloads > 0 && (
+                  <span className="px-1.5 py-0.5 rounded-md bg-primary/20 text-primary text-[10px] font-bold">
+                    {activeDownloads}
+                  </span>
+                )}
               </Link>
             ))}
+            <div className="h-px bg-white/5 my-2" />
             <Link
-              href="/search"
-              className={`py-2.5 px-3 rounded-lg text-sm font-medium transition-colors ${
-                pathname === '/search'
-                  ? 'text-white bg-white/5'
-                  : 'text-on-surface-variant hover:text-white hover:bg-white/5'
-              }`}
-              onClick={() => setMobileMenuOpen(false)}
+              href="/profile"
+              className="py-2.5 px-3 rounded-lg text-sm font-medium text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
             >
-              Search
+              Preferences
             </Link>
-
-            {user ? (
-              <>
-                <div className="h-px bg-white/5 my-2" />
-                <Link
-                  href="/profile"
-                  className="py-2.5 px-3 rounded-lg text-sm font-medium text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Profile
-                </Link>
-                <button
-                  onClick={async () => {
-                    setMobileMenuOpen(false);
-                    await signOut();
-                    router.push('/');
-                  }}
-                  className="py-2.5 px-3 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 transition-colors text-left"
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/auth"
-                className="py-2.5 px-3 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Sign In
-              </Link>
-            )}
+            <Link
+              href="/admin"
+              className="py-2.5 px-3 rounded-lg text-sm font-medium text-on-surface-variant hover:text-white hover:bg-white/5 transition-colors"
+            >
+              Admin
+            </Link>
+            <p className="px-3 pt-3 text-[11px] text-on-surface-variant/70 leading-snug">
+              Veyra has no accounts — everything you save stays on this device.
+            </p>
           </div>
         </div>
       )}

@@ -126,54 +126,22 @@ interface WatchProgress {
   updatedAt: string;
 }
 
-// Optional async source of the auth token (the Firebase ID token). Registered
-// by the client auth layer so every request resolves a fresh token.
-let tokenProvider: (() => Promise<string | null>) | null = null;
-
-export function setTokenProvider(fn: (() => Promise<string | null>) | null) {
-  tokenProvider = fn;
-}
-
-export function clearLegacySession() {
-  if (typeof window !== 'undefined') {
-    try {
-      window.localStorage.removeItem('veyra-access-token');
-    } catch {
-      // ignore
-    }
-  }
-}
+// Veyra has no user accounts. Two headers replace the old bearer token:
+//
+//   X-Veyra-Device-Id  an opaque random id generated once per install. It lets
+//                      the API keep one watchlist/progress row per device
+//                      without collecting an email address or password.
+//   X-Veyra-Admin-Key  present only when someone has unlocked /admin. Validated
+//                      server-side against ADMIN_ACCESS_KEY.
+export const DEVICE_HEADER = 'X-Veyra-Device-Id';
+export const ADMIN_KEY_HEADER = 'X-Veyra-Admin-Key';
 
 class ApiClient {
   private baseUrl: string;
-  private accessToken: string | null = null;
   private mockWarned = false;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
-    // Restore any persisted token (legacy sessions / mock mode)
-    if (typeof window !== 'undefined') {
-      try {
-        this.accessToken = window.localStorage.getItem('veyra-access-token');
-      } catch {
-        // ignore
-      }
-    }
-  }
-
-  setAccessToken(token: string | null) {
-    this.accessToken = token;
-    if (typeof window !== 'undefined') {
-      try {
-        if (token) {
-          window.localStorage.setItem('veyra-access-token', token);
-        } else {
-          window.localStorage.removeItem('veyra-access-token');
-        }
-      } catch {
-        // ignore
-      }
-    }
   }
 
   isMockFallback() {
@@ -221,11 +189,19 @@ class ApiClient {
       headers['Content-Type'] = 'application/json';
     }
 
-    // Resolve the bearer token: explicit token (mock/legacy) or the
-    // Firebase ID token provider registered by the auth layer.
-    const token = this.accessToken || (tokenProvider ? await tokenProvider() : null);
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+    // Device identity (guest sync) + admin key when the admin area is unlocked.
+    try {
+      const { getDeviceId } = await import('./guest');
+      headers[DEVICE_HEADER] = getDeviceId();
+    } catch {
+      // guest module unavailable — the request still works, just unsynced
+    }
+    try {
+      const { getAdminKey } = await import('./admin-key');
+      const adminKey = getAdminKey();
+      if (adminKey) headers[ADMIN_KEY_HEADER] = adminKey;
+    } catch {
+      // ignore
     }
 
     const response = await fetch(url, {
@@ -241,18 +217,18 @@ class ApiClient {
     return response.json();
   }
 
-  // ── Auth (Firebase) ──────────────────────────────────────────────────
-  // Sign-in/sign-up happen in the Firebase SDK; this endpoint exchanges the
-  // resulting ID token for the Veyra user (creating/linking the account).
-  async exchangeFirebaseToken(idToken: string) {
-    return this.request<{ user: User; isNewUser: boolean }>('/api/auth/firebase', {
-      method: 'POST',
-      body: JSON.stringify({ idToken }),
-    });
+  // ── Admin unlock ─────────────────────────────────────────────────────
+  // The only credential left in Veyra. Validated server-side against
+  // ADMIN_ACCESS_KEY (or the documented demo key in mock mode).
+  async unlockAdmin(key: string) {
+    return this.request<{ success: boolean; mode?: string; error?: string }>(
+      '/api/admin/unlock',
+      { method: 'POST', body: JSON.stringify({ key }) }
+    );
   }
 
-  async getMe() {
-    return this.request<{ user: User }>('/api/auth/me');
+  async adminStatus() {
+    return this.request<{ admin: boolean; mode?: string }>('/api/admin/status');
   }
 
   // Movies
@@ -423,15 +399,6 @@ class ApiClient {
     }>(`/api/ratings/user?limit=${limit}`);
   }
 
-  // ── Profile ─────────────────────────────────────────────────────
-
-  async updateProfile(data: { displayName?: string; avatarUrl?: string }) {
-    return this.request<{ user: User }>('/api/auth/profile', {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    });
-  }
-
   // ── Offline Queue ──────────────────────────────────────────────
 
   async flushOfflineQueue() {
@@ -513,6 +480,41 @@ class ApiClient {
   async getDiscoveryGenres() {
     return this.request<{ genres: Array<{ id: number; name: string }> }>(
       '/api/discovery/genres'
+    );
+  }
+
+  /**
+   * Which services legally stream a title in a region (TMDB/JustWatch data).
+   * This is how Tubi, Pluto, Plex and friends appear in Veyra without Veyra
+   * ever touching their streams.
+   */
+  async discoveryWatchProviders(tmdbId: number, mediaType: 'movie' | 'tv', region = 'US') {
+    return this.request<{ providers: WatchProviderInfo }>(
+      `/api/discovery/${mediaType}/${tmdbId}/watch-providers?region=${encodeURIComponent(region)}`
+    );
+  }
+
+  // ── Source providers (optional server proxy) ───────────────────────
+  // The browser normally talks to archive.org directly, because those JSON
+  // APIs are CORS-enabled and it keeps the app working with no backend at all.
+  // These proxied versions exist for deployments that want the Worker to cache
+  // provider responses and present a single IP to the provider.
+
+  async providerSearch(provider: string, query: string, opts: { page?: number; limit?: number } = {}) {
+    const params = new URLSearchParams({ q: query });
+    if (opts.page) params.set('page', String(opts.page));
+    if (opts.limit) params.set('limit', String(opts.limit));
+    return this.request<{ result: SourceSearchResultDto }>(
+      `/api/providers/${provider}/search?${params.toString()}`
+    );
+  }
+
+  async providerResolve(provider: string, id: string, episodeId?: string) {
+    const params = new URLSearchParams();
+    if (episodeId) params.set('episode', episodeId);
+    const suffix = params.toString() ? `?${params.toString()}` : '';
+    return this.request<{ playable: PlayableDto | null }>(
+      `/api/providers/${provider}/${encodeURIComponent(id)}${suffix}`
     );
   }
 
@@ -645,6 +647,84 @@ export interface TMDBImportResult {
   tmdbId: number;
   mediaType: string;
   imported: boolean;
+}
+
+// ── Source provider DTOs (mirror lib/sources/types.ts) ──────────────
+
+export interface DownloadTargetDto {
+  url: string;
+  filename: string;
+  sizeBytes?: number;
+  quality?: string;
+  mimeType?: string;
+  durationSec?: number;
+}
+
+export interface PlayableDto {
+  provider: string;
+  id: string;
+  kind: 'video' | 'hls' | 'iframe' | 'external';
+  url: string;
+  title?: string;
+  posterUrl?: string;
+  externalUrl?: string;
+  externalProvider?: string;
+  downloadTargets?: DownloadTargetDto[];
+  episodes?: Array<{
+    id: string;
+    number: number;
+    season?: number;
+    title: string;
+    durationSec?: number;
+    playable: PlayableDto;
+    downloadTargets?: DownloadTargetDto[];
+  }>;
+  license?: string;
+  licenseUrl?: string;
+  sourceUrl?: string;
+}
+
+export interface SourceSearchResultDto {
+  provider: string;
+  query: string;
+  page: number;
+  totalResults?: number;
+  totalPages?: number;
+  error?: string;
+  items: Array<{
+    provider: string;
+    id: string;
+    title: string;
+    year?: number;
+    description?: string;
+    posterUrl?: string;
+    backdropUrl?: string;
+    durationSec?: number;
+    kind: 'movie' | 'series';
+    license?: string;
+    licenseUrl?: string;
+    sourceUrl?: string;
+    score?: number;
+  }>;
+}
+
+export interface WatchProviderDto {
+  providerId: number;
+  name: string;
+  logoUrl?: string;
+  type: 'free' | 'ads' | 'flatrate' | 'rent' | 'buy';
+  displayPriority?: number;
+}
+
+export interface WatchProviderInfo {
+  tmdbId: number;
+  mediaType: 'movie' | 'tv';
+  region: string;
+  link: string;
+  providers: WatchProviderDto[];
+  free: WatchProviderDto[];
+  subscription: WatchProviderDto[];
+  rentOrBuy: WatchProviderDto[];
 }
 
 // Export singleton instance

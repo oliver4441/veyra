@@ -3,6 +3,7 @@
 // so every page works without the backend. Mirrors the exact response
 // shapes the real Cloudflare Worker returns.
 
+import { DEMO_ADMIN_KEY } from '../admin-key';
 import {
   getDB,
   saveDB,
@@ -140,9 +141,52 @@ export async function mockRequest(
   const userId = session.user.id;
   await delay(200);
 
-  // ── Auth ────────────────────────────────────────────────────────────────
-  // Firebase token exchange — maps the Firebase user (or demo user) to the
-  // mock DB user so the app works end-to-end in demo mode.
+  // ── Guest + admin key ───────────────────────────────────────────────────
+  // Veyra has no accounts. `requireSession()` above already attached the
+  // on-device guest, so every catalogue/watchlist/progress route just works.
+  // The only credential left is the admin key.
+  if (path === '/api/admin/unlock' && method === 'POST') {
+    const { key } = options.body || {};
+    if (typeof key !== 'string' || key.trim() !== DEMO_ADMIN_KEY) {
+      addAudit('admin.unlock.denied');
+      return { success: false, error: 'That key was rejected.' };
+    }
+    const admin = db.users.find((u) => u.role === 'admin') || db.users[0];
+    db.session = makeSession(admin);
+    saveDB();
+    addAudit('admin.unlock', admin.username);
+    return { success: true, mode: 'demo' };
+  }
+
+  if (path === '/api/admin/status' && method === 'GET') {
+    return { admin: session.user.role === 'admin', mode: 'demo' };
+  }
+
+  // ── Watch providers (TMDB/JustWatch) ────────────────────────────────────
+  // The mock backend has no TMDB token, so it reports an empty availability
+  // list. The UI treats that as "no external platforms to link to" and simply
+  // shows the archive.org matches instead.
+  const watchProvidersMatch = path.match(
+    /^\/api\/discovery\/(movie|tv)\/(\d+)\/watch-providers$/
+  );
+  if (watchProvidersMatch && method === 'GET') {
+    const mediaType = watchProvidersMatch[1] as 'movie' | 'tv';
+    const tmdbId = parseInt(watchProvidersMatch[2], 10);
+    const region = (query.get('region') || 'US').toUpperCase();
+    return {
+      providers: {
+        tmdbId,
+        mediaType,
+        region,
+        link: `https://www.themoviedb.org/${mediaType}/${tmdbId}/watch?locale=${region}`,
+        providers: [],
+        free: [],
+        subscription: [],
+        rentOrBuy: [],
+      },
+    };
+  }
+
   if (path === '/api/auth/firebase' && method === 'POST') {
     const { idToken } = options.body || {};
     // Best-effort email extraction from the JWT payload (demo mode only)
@@ -481,7 +525,12 @@ export async function mockRequest(
   }
 
   // ── Admin ───────────────────────────────────────────────────────────────
-  if (session.user.role !== 'admin' && path.startsWith('/api/admin/')) {
+  const publicAdminPaths = ['/api/admin/unlock', '/api/admin/status'];
+  if (
+    session.user.role !== 'admin' &&
+    path.startsWith('/api/admin/') &&
+    !publicAdminPaths.includes(path)
+  ) {
     const err = new Error('Forbidden: admin access required') as Error & { status?: number };
     err.status = 403;
     throw err;

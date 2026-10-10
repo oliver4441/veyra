@@ -1,7 +1,16 @@
 import { Hono } from 'hono';
 import { eq, desc, asc, sql, and, inArray } from 'drizzle-orm';
 import { getDb } from '../lib/db';
-import { movies, genres, movieGenres, series, seasons, episodes, mediaFiles } from '../db/schema';
+import {
+  movies,
+  genres,
+  movieGenres,
+  series,
+  seasons,
+  episodes,
+  mediaFiles,
+  mediaSources,
+} from '../db/schema';
 import type { Env } from '../index';
 
 const moviesRouter = new Hono<{ Bindings: Env }>();
@@ -204,6 +213,14 @@ moviesRouter.get('/:slug', async (c) => {
     .from(mediaFiles)
     .where(eq(mediaFiles.movieId, movie.id));
 
+  // External source bindings (archive.org / YouTube / deep links), best first.
+  // This is what lets a catalogue entry play even when Veyra hosts no file.
+  const sourceList = await db
+    .select()
+    .from(mediaSources)
+    .where(eq(mediaSources.movieId, movie.id))
+    .orderBy(asc(mediaSources.priority), asc(mediaSources.id));
+
   return c.json({
     movie: {
       ...movie,
@@ -211,8 +228,34 @@ moviesRouter.get('/:slug', async (c) => {
       series: seriesInfo,
       seasons: seasonList,
       mediaFiles: mediaFilesList,
+      sources: sourceList,
     },
   });
+});
+
+// GET /api/movies/:slug/sources - playback bindings only (cheap, cacheable)
+moviesRouter.get('/:slug/sources', async (c) => {
+  const db = getDb(c.env.DATABASE_URL);
+  const slug = c.req.param('slug');
+
+  const [movie] = await db
+    .select({ id: movies.id })
+    .from(movies)
+    .where(eq(movies.slug, slug))
+    .limit(1);
+
+  if (!movie) {
+    return c.json({ error: 'Movie not found' }, 404);
+  }
+
+  const sourceList = await db
+    .select()
+    .from(mediaSources)
+    .where(eq(mediaSources.movieId, movie.id))
+    .orderBy(asc(mediaSources.priority), asc(mediaSources.id));
+
+  c.header('Cache-Control', 'public, max-age=300');
+  return c.json({ sources: sourceList });
 });
 
 // GET /api/movies/:slug/episodes - Get episodes for a series

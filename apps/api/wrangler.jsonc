@@ -7,7 +7,16 @@
   "vars": {
     "ENVIRONMENT": "development",
     "FIREBASE_PROJECT_ID": "omix-systems-cd1af",
-    "ADMIN_EMAILS": ""
+    "ADMIN_EMAILS": "",
+    // Veyra is accountless: guests are identified by an anonymous device id.
+    // Set to "false" to require a Firebase token again.
+    "GUEST_MODE": "true"
+    // Secrets (never put these in "vars"):
+    //   wrangler secret put DATABASE_URL
+    //   wrangler secret put TMDB_API_READ_ACCESS_TOKEN
+    //   wrangler secret put ADMIN_ACCESS_KEY      # unlocks /api/admin/*
+    //   wrangler secret put YOUTUBE_API_KEY       # optional, server-side only
+    //   wrangler secret put CORS_ORIGIN
   },
   // R2 Bucket Binding
   "r2_buckets": [
